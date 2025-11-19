@@ -52,7 +52,8 @@ const swaggerDefinition = {
         { name: 'Reviews', description: 'Đánh giá sản phẩm' },
         { name: 'Reports', description: 'Báo cáo quản trị' },
         { name: 'Feedback', description: 'Phản hồi của người dùng' },
-        { name: 'Consultations', description: 'Tư vấn, trao đổi giữa khách và admin' }
+        { name: 'Consultations', description: 'Tư vấn, trao đổi giữa khách và admin' },
+        { name: 'Profile', description: 'Thông tin cá nhân người dùng' }
     ],
     components: {
         securitySchemes: {
@@ -343,6 +344,32 @@ const swaggerDefinition = {
                 type: 'object',
                 properties: {
                     checkoutUrl: { type: 'string' }
+                }
+            },
+            Profile: {
+                type: 'object',
+                properties: {
+                    _id: { type: 'string' },
+                    name: { type: 'string' },
+                    email: { type: 'string' },
+                    phone: { type: 'string' },
+                    address: { type: 'string' }
+                }
+            },
+            UpdateProfileRequest: {
+                type: 'object',
+                properties: {
+                    name: { type: 'string' },
+                    phone: { type: 'string' },
+                    address: { type: 'string' }
+                }
+            },
+            ChangePasswordRequest: {
+                type: 'object',
+                required: ['currentPassword', 'newPassword'],
+                properties: {
+                    currentPassword: { type: 'string' },
+                    newPassword: { type: 'string', minLength: 6 }
                 }
             },
             FeedbackRequest: {
@@ -1014,6 +1041,45 @@ const swaggerDefinition = {
                 responses: {
                     200: successResponse('Đã đóng cuộc tư vấn', { $ref: '#/components/schemas/Consultation' }),
                     404: errorResponse('Không tìm thấy cuộc tư vấn')
+                }
+            }
+        },
+        '/profile': {
+            get: {
+                tags: ['Profile'],
+                summary: 'Xem thông tin cá nhân',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    200: successResponse('Thông tin cá nhân', { $ref: '#/components/schemas/Profile' })
+                }
+            },
+            put: {
+                tags: ['Profile'],
+                summary: 'Cập nhật thông tin cá nhân',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateProfileRequest' } } }
+                },
+                responses: {
+                    200: successResponse('Đã cập nhật', { $ref: '#/components/schemas/Profile' })
+                }
+            }
+        },
+        '/profile/password': {
+            put: {
+                tags: ['Profile'],
+                summary: 'Đổi mật khẩu',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': { schema: { $ref: '#/components/schemas/ChangePasswordRequest' } }
+                    }
+                },
+                responses: {
+                    200: successResponse('Đổi mật khẩu thành công'),
+                    400: errorResponse('Mật khẩu hiện tại không đúng')
                 }
             }
         }
