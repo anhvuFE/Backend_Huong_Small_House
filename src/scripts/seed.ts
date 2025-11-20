@@ -9,38 +9,89 @@ import Promotion from '../models/Promotion';
 import Counter from '../models/Counter';
 
 const categories = [
-  { name: 'Vitamin tổng hợp', slug: 'vitamin' },
-  { name: 'Sức khỏe tiêu hóa', slug: 'digestive-health' },
-  { name: 'Tăng cường miễn dịch', slug: 'immune-support' }
+  { name: 'Vitamin', slug: 'vitamin' },
+  { name: 'Collagen', slug: 'collagen' },
+  { name: 'Xương khớp', slug: 'bone-support' },
+  { name: 'Giảm cân', slug: 'weight-loss' },
+  { name: 'Tăng đề kháng', slug: 'immunity' },
+  { name: 'Tiêu hóa', slug: 'digestive' },
+  { name: 'Tim mạch', slug: 'heart-health' },
+  { name: 'Làm đẹp', slug: 'beauty' },
+  { name: 'Giấc ngủ', slug: 'sleep' }
 ];
 
 const products = [
   {
-    name: 'Small House Multivitamin',
-    brand: 'Small House',
+    name: 'Vitamin C 1000mg Kirkland',
+    brand: 'Kirkland',
     categorySlug: 'vitamin',
-    description: 'Bổ sung 12 loại vitamin thiết yếu.',
-    price: 350000,
-    stock: 120,
-    images: [{ url: 'https://placehold.co/600x400?text=Multivitamin' }]
+    description: 'Bổ sung vitamin C tinh khiết giúp tăng cường đề kháng.',
+    price: 450000,
+    stock: 100,
+    images: [{ url: 'https://placehold.co/600x400?text=Vitamin+C' }]
   },
   {
-    name: 'Probiotic Daily',
-    brand: 'Huong Small',
-    categorySlug: 'digestive-health',
-    description: 'Hỗ trợ hệ tiêu hóa khỏe mạnh.',
-    price: 280000,
+    name: 'Collagen Youtheory Type 1 2 & 3',
+    brand: 'Youtheory',
+    categorySlug: 'collagen',
+    description: 'Hỗ trợ da, tóc và xương khớp săn chắc.',
+    price: 680000,
+    stock: 50,
+    images: [{ url: 'https://placehold.co/600x400?text=Collagen' }]
+  },
+  {
+    name: 'Glucosamine Chondroitin MSM',
+    brand: "Doctor's Best",
+    categorySlug: 'bone-support',
+    description: 'Chăm sóc xương khớp và hỗ trợ vận động.',
+    price: 720000,
+    stock: 30,
+    images: [{ url: 'https://placehold.co/600x400?text=Bone+Support' }]
+  },
+  {
+    name: 'Omega 3 Fish Oil 1000mg',
+    brand: 'Nature Made',
+    categorySlug: 'heart-health',
+    description: 'Dầu cá hỗ trợ tim mạch và trí não khỏe mạnh.',
+    price: 550000,
     stock: 80,
+    images: [{ url: 'https://placehold.co/600x400?text=Omega+3' }]
+  },
+  {
+    name: 'Probiotics 50 Billion CFU',
+    brand: 'Garden of Life',
+    categorySlug: 'digestive',
+    description: 'Men vi sinh hỗ trợ hệ tiêu hóa khỏe mạnh.',
+    price: 890000,
+    stock: 40,
     images: [{ url: 'https://placehold.co/600x400?text=Probiotic' }]
   },
   {
-    name: 'Vitamin C 1000mg',
-    brand: 'Small House',
-    categorySlug: 'immune-support',
-    description: 'Tăng sức đề kháng với vitamin C nguyên chất.',
-    price: 190000,
-    stock: 200,
-    images: [{ url: 'https://placehold.co/600x400?text=Vitamin+C' }]
+    name: 'Viên uống giảm cân Green Tea Extract',
+    brand: 'Applied Nutrition',
+    categorySlug: 'weight-loss',
+    description: 'Chiết xuất trà xanh hỗ trợ kiểm soát cân nặng lành mạnh.',
+    price: 420000,
+    stock: 60,
+    images: [{ url: 'https://placehold.co/600x400?text=Green+Tea' }]
+  },
+  {
+    name: 'Vitamin D3 5000 IU',
+    brand: 'NOW Foods',
+    categorySlug: 'vitamin',
+    description: 'Bổ sung vitamin D3 hỗ trợ xương và miễn dịch.',
+    price: 320000,
+    stock: 120,
+    images: [{ url: 'https://placehold.co/600x400?text=Vitamin+D3' }]
+  },
+  {
+    name: 'Biotin 10000mcg cho tóc và móng',
+    brand: 'Sports Research',
+    categorySlug: 'beauty',
+    description: 'Biotin nuôi dưỡng tóc và móng chắc khỏe.',
+    price: 380000,
+    stock: 70,
+    images: [{ url: 'https://placehold.co/600x400?text=Biotin' }]
   }
 ];
 
