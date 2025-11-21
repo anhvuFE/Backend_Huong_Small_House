@@ -23,7 +23,11 @@ const limiter = rateLimit({
   max: 100
 });
 
-app.use(limiter);
+if (env.nodeEnv === 'production') {
+  app.use(limiter);
+} else {
+  logger.info('Rate limiting is disabled in non-production environments');
+}
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
