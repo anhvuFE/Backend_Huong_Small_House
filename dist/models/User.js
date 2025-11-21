@@ -14,7 +14,9 @@ const userSchema = new mongoose_1.Schema({
     phone: String,
     address: String,
     provider: { type: String, enum: ['local', 'google'], default: 'local' },
-    role: { type: String, enum: ['customer', 'admin'], default: 'customer' }
+    role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
+    status: { type: String, enum: ['active', 'locked'], default: 'active' },
+    lockedAt: { type: Date, default: null }
 }, { timestamps: true });
 userSchema.pre('save', async function (next) {
     if (this.isNew && !this.userId) {

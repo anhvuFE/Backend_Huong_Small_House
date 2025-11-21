@@ -8,6 +8,8 @@ export interface IUser extends Document {
     address?: string;
     provider: 'local' | 'google';
     role: 'customer' | 'admin';
+    status: 'active' | 'locked';
+    lockedAt?: Date;
     comparePassword(password: string): Promise<boolean>;
 }
 declare const User: import("mongoose").Model<IUser, {}, {}, {}, Document<unknown, {}, IUser, {}, {}> & IUser & Required<{

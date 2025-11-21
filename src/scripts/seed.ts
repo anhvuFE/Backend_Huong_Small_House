@@ -4,9 +4,10 @@ import logger from '../utils/logger';
 import User from '../models/User';
 import Admin from '../models/Admin';
 import Category from '../models/Category';
-import Product from '../models/Product';
+import Product, { IProduct } from '../models/Product';
 import Promotion from '../models/Promotion';
 import Counter from '../models/Counter';
+import Order, { IOrderItem } from '../models/Order';
 
 const categories = [
   { name: 'Vitamin', slug: 'vitamin' },
@@ -112,6 +113,35 @@ const promotions = [
   }
 ];
 
+const buildOrder = (userId: string, products: IProduct[], date: Date, items: Array<{ productId: number; quantity: number }>) => {
+  const orderItems: IOrderItem[] = items.map((item) => {
+    const product = products.find((p) => p.productId === item.productId);
+    if (!product) {
+      throw new Error(`Missing product ${item.productId} for seed order`);
+    }
+    return {
+      productId: product.productId,
+      name: product.name,
+      quantity: item.quantity,
+      price: product.price
+    };
+  });
+
+  const total = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  return {
+    user: userId,
+    items: orderItems,
+    total,
+    paymentMethod: 'COD',
+    paymentStatus: 'paid',
+    status: 'delivered',
+    email: 'xanh@gmail.com',
+    createdAt: date,
+    updatedAt: date
+  };
+};
+
 const seed = async (): Promise<void> => {
   await mongoose.connect(env.mongoUri);
   logger.info('Connected to MongoDB');
@@ -160,6 +190,60 @@ const seed = async (): Promise<void> => {
 
   await Promotion.insertMany(promotions);
   logger.info('Seeded promotions');
+
+  const seededProducts = await Product.find({}).exec();
+  const year = new Date().getFullYear();
+  const ordersPayload = [
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 0, 10, 9, 30), [
+      { productId: seededProducts[0].productId, quantity: 2 },
+      { productId: seededProducts[1].productId, quantity: 1 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 1, 5, 14, 15), [
+      { productId: seededProducts[2].productId, quantity: 1 },
+      { productId: seededProducts[3].productId, quantity: 2 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 2, 18, 11, 45), [
+      { productId: seededProducts[4].productId, quantity: 1 },
+      { productId: seededProducts[0].productId, quantity: 1 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 3, 22, 16, 5), [
+      { productId: seededProducts[5].productId, quantity: 3 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 4, 9, 10, 20), [
+      { productId: seededProducts[6].productId, quantity: 2 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 5, 14, 13, 50), [
+      { productId: seededProducts[7].productId, quantity: 1 },
+      { productId: seededProducts[1].productId, quantity: 1 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 6, 2, 15, 10), [
+      { productId: seededProducts[2].productId, quantity: 2 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 7, 21, 18, 40), [
+      { productId: seededProducts[3].productId, quantity: 1 },
+      { productId: seededProducts[4].productId, quantity: 2 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 8, 12, 9, 5), [
+      { productId: seededProducts[0].productId, quantity: 1 },
+      { productId: seededProducts[6].productId, quantity: 1 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 9, 3, 17, 25), [
+      { productId: seededProducts[5].productId, quantity: 1 },
+      { productId: seededProducts[7].productId, quantity: 2 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 10, 8, 8, 40), [
+      { productId: seededProducts[4].productId, quantity: 1 }
+    ]),
+    buildOrder(user._id.toString(), seededProducts, new Date(year, 11, 15, 19, 0), [
+      { productId: seededProducts[1].productId, quantity: 2 },
+      { productId: seededProducts[6].productId, quantity: 1 }
+    ])
+  ];
+
+  for (const order of ordersPayload) {
+    await Order.create(order);
+  }
+  logger.info('Seeded %d orders across months', ordersPayload.length);
 
   await mongoose.disconnect();
   logger.info('Seed finished');

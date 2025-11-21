@@ -59,6 +59,9 @@ class AuthService {
   async login(email: string, password: string): Promise<AuthResult> {
     const user = await User.findOne({ email }).select('+password');
     if (user) {
+      if (user.status === 'locked') {
+        throw new AppError('Tài khoản đã bị khóa', 403);
+      }
       const valid = await user.comparePassword(password);
       if (!valid) {
         throw new AppError('Invalid credentials', 401);
