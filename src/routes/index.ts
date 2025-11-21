@@ -8,6 +8,7 @@ import reportRoutes from './report.routes';
 import feedbackRoutes from './feedback.routes';
 import consultationRoutes from './consultation.routes';
 import profileRoutes from './profile.routes';
+import userRoutes from './user.routes';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/reports', reportRoutes);
 router.use('/feedback', feedbackRoutes);
 router.use('/consultations', consultationRoutes);
 router.use('/profile', profileRoutes);
+router.use('/users', userRoutes);
 
 export default router;

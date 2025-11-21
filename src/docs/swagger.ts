@@ -59,6 +59,7 @@ const swaggerDefinition = {
     { name: 'Reports', description: 'Báo cáo quản trị' },
     { name: 'Feedback', description: 'Phản hồi của người dùng' },
     { name: 'Consultations', description: 'Tư vấn, trao đổi giữa khách và admin' },
+    { name: 'Users', description: 'Quản lý người dùng (admin)' },
     { name: 'Profile', description: 'Thông tin cá nhân người dùng' }
   ],
   components: {
@@ -117,9 +118,11 @@ const swaggerDefinition = {
             type: 'object',
             properties: {
               _id: { type: 'string' },
+              userId: { type: 'integer' },
               email: { type: 'string' },
               name: { type: 'string' },
-              role: { type: 'string' }
+              role: { type: 'string' },
+              status: { type: 'string', enum: ['active', 'locked'] }
             }
           },
           accessToken: { type: 'string' },
@@ -270,12 +273,36 @@ const swaggerDefinition = {
           comment: { type: 'string' }
         }
       },
+      UserStats: {
+        type: 'object',
+        properties: {
+          totalUsers: { type: 'number' },
+          newUsers: { type: 'number' },
+          lockedUsers: { type: 'number' },
+          activeCustomers: { type: 'number' }
+        }
+      },
+      TopCustomer: {
+        type: 'object',
+        properties: {
+          userId: { type: 'integer' },
+          name: { type: 'string' },
+          email: { type: 'string' },
+          totalOrders: { type: 'number' },
+          totalSpent: { type: 'number' }
+        }
+      },
       ReportResponse: {
         type: 'object',
         properties: {
           totalOrders: { type: 'number' },
           totalRevenue: { type: 'number' },
-          bestSeller: { type: 'string' }
+          bestSeller: { type: 'string' },
+          userStats: { $ref: '#/components/schemas/UserStats' },
+          topCustomers: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/TopCustomer' }
+          }
         }
       },
       DailyBreakdownEntry: {
@@ -376,6 +403,23 @@ const swaggerDefinition = {
         properties: {
           currentPassword: { type: 'string' },
           newPassword: { type: 'string', minLength: 6 }
+        }
+      },
+      ManagedUser: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          userId: { type: 'integer' },
+          name: { type: 'string' },
+          email: { type: 'string' },
+          phone: { type: 'string' },
+          address: { type: 'string' },
+          status: { type: 'string', enum: ['active', 'locked'] },
+          lockedAt: { type: 'string', format: 'date-time', nullable: true },
+          provider: { type: 'string', enum: ['local', 'google'] },
+          role: { type: 'string', enum: ['customer', 'admin'] },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
         }
       },
       FeedbackRequest: {
@@ -1086,6 +1130,63 @@ const swaggerDefinition = {
         responses: {
           200: successResponse('Đổi mật khẩu thành công'),
           400: errorResponse('Mật khẩu hiện tại không đúng')
+        }
+      }
+    },
+    '/users': {
+      get: {
+        tags: ['Users'],
+        summary: 'Danh sách người dùng',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'status',
+            in: 'query',
+            schema: { type: 'string', enum: ['active', 'locked'] }
+          },
+          { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Tìm theo tên/email/sđt' }
+        ],
+        responses: {
+          200: successResponse('Danh sách người dùng', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/ManagedUser' }
+          })
+        }
+      }
+    },
+    '/users/{userId}': {
+      get: {
+        tags: ['Users'],
+        summary: 'Xem chi tiết người dùng',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: {
+          200: successResponse('Chi tiết người dùng', { $ref: '#/components/schemas/ManagedUser' }),
+          404: errorResponse('Không tìm thấy người dùng')
+        }
+      }
+    },
+    '/users/{userId}/lock': {
+      patch: {
+        tags: ['Users'],
+        summary: 'Khoá tài khoản người dùng',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: {
+          200: successResponse('Đã khoá người dùng', { $ref: '#/components/schemas/ManagedUser' }),
+          404: errorResponse('Không tìm thấy người dùng')
+        }
+      }
+    },
+    '/users/{userId}/unlock': {
+      patch: {
+        tags: ['Users'],
+        summary: 'Mở khoá tài khoản người dùng',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'userId', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: {
+          200: successResponse('Đã mở khoá người dùng', { $ref: '#/components/schemas/ManagedUser' }),
+          404: errorResponse('Không tìm thấy người dùng')
         }
       }
     }

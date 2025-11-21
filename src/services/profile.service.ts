@@ -7,7 +7,13 @@ class ProfileService {
   }
 
   async updateProfile(userId: string, payload: Partial<IUser>): Promise<IUser> {
-    const user = await User.findByIdAndUpdate(userId, payload, { new: true }).select('-password');
+    const safePayload = { ...payload };
+    delete safePayload.role;
+    delete safePayload.status;
+    delete (safePayload as { provider?: string }).provider;
+    delete (safePayload as { userId?: number }).userId;
+
+    const user = await User.findByIdAndUpdate(userId, safePayload, { new: true }).select('-password');
     if (!user) {
       throw new AppError('User not found', 404);
     }

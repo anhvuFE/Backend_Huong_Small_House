@@ -10,7 +10,12 @@ class ProfileService {
         return User_1.default.findById(userId).select('-password');
     }
     async updateProfile(userId, payload) {
-        const user = await User_1.default.findByIdAndUpdate(userId, payload, { new: true }).select('-password');
+        const safePayload = { ...payload };
+        delete safePayload.role;
+        delete safePayload.status;
+        delete safePayload.provider;
+        delete safePayload.userId;
+        const user = await User_1.default.findByIdAndUpdate(userId, safePayload, { new: true }).select('-password');
         if (!user) {
             throw new appError_1.default('User not found', 404);
         }

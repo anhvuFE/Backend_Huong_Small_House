@@ -1,7 +1,22 @@
+interface UserStats {
+    totalUsers: number;
+    newUsers: number;
+    lockedUsers: number;
+    activeCustomers: number;
+}
+interface TopCustomer {
+    userId: number;
+    name: string;
+    email: string;
+    totalOrders: number;
+    totalSpent: number;
+}
 interface DailyReport {
     totalOrders: number;
     totalRevenue: number;
     bestSeller: string;
+    userStats: UserStats;
+    topCustomers: TopCustomer[];
 }
 interface DailyBreakdownEntry {
     date: string;
@@ -26,6 +41,9 @@ interface TopProduct {
 }
 declare class ReportService {
     private calculateBestSeller;
+    private buildUserStats;
+    private getTopCustomers;
+    private buildBaseReport;
     getDailyReport(date: string): Promise<DailyReport>;
     getMonthlyReport(year: number, month: number): Promise<MonthlyReport>;
     getYearlyReport(year: number): Promise<YearlyReport>;

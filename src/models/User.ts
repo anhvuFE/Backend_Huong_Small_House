@@ -11,6 +11,8 @@ export interface IUser extends Document {
   address?: string;
   provider: 'local' | 'google';
   role: 'customer' | 'admin';
+   status: 'active' | 'locked';
+   lockedAt?: Date;
   comparePassword(password: string): Promise<boolean>;
 }
 
@@ -23,7 +25,9 @@ const userSchema = new Schema<IUser>(
     phone: String,
     address: String,
     provider: { type: String, enum: ['local', 'google'], default: 'local' },
-    role: { type: String, enum: ['customer', 'admin'], default: 'customer' }
+    role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
+    status: { type: String, enum: ['active', 'locked'], default: 'active' },
+    lockedAt: { type: Date, default: null }
   },
   { timestamps: true }
 );
