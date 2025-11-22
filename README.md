@@ -92,6 +92,7 @@ Seeded accounts:
 | Feedback    | `POST /feedback`, `GET /feedback/me`, `GET /feedback` (admin), `PATCH /feedback/:id/status`, `POST /feedback/:id/respond` |
 | Consultations | `POST /consultations`, `GET /consultations/me`, `GET /consultations` (admin), `POST /consultations/:id/messages`, `POST /consultations/:id/admin/messages`, `POST /consultations/:id/close` |
 | Profile     | `GET /profile`, `PUT /profile`, `PUT /profile/password`                          |
+| Blogs       | `GET /blogs`, `GET /blogs/all` (admin), `GET /blogs/{id}`, `POST /blogs` (admin), `PUT /blogs/{id}` (admin), `DELETE /blogs/{id}` (admin) |
 
 Every module uses dedicated service classes to keep controllers thin and maintainable. Guests can create orders without JWTs, while authenticated users and admins receive role-based access control.
 

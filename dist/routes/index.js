@@ -14,6 +14,7 @@ const feedback_routes_1 = __importDefault(require("./feedback.routes"));
 const consultation_routes_1 = __importDefault(require("./consultation.routes"));
 const profile_routes_1 = __importDefault(require("./profile.routes"));
 const user_routes_1 = __importDefault(require("./user.routes"));
+const blog_routes_1 = __importDefault(require("./blog.routes"));
 const router = (0, express_1.Router)();
 router.use('/auth', auth_routes_1.default);
 router.use('/products', product_routes_1.default);
@@ -25,5 +26,6 @@ router.use('/feedback', feedback_routes_1.default);
 router.use('/consultations', consultation_routes_1.default);
 router.use('/profile', profile_routes_1.default);
 router.use('/users', user_routes_1.default);
+router.use('/blogs', blog_routes_1.default);
 exports.default = router;
 //# sourceMappingURL=index.js.map

@@ -9,6 +9,7 @@ import feedbackRoutes from './feedback.routes';
 import consultationRoutes from './consultation.routes';
 import profileRoutes from './profile.routes';
 import userRoutes from './user.routes';
+import blogRoutes from './blog.routes';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/feedback', feedbackRoutes);
 router.use('/consultations', consultationRoutes);
 router.use('/profile', profileRoutes);
 router.use('/users', userRoutes);
+router.use('/blogs', blogRoutes);
 
 export default router;
