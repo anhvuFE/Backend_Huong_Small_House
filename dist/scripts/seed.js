@@ -13,6 +13,9 @@ const Product_1 = __importDefault(require("../models/Product"));
 const Promotion_1 = __importDefault(require("../models/Promotion"));
 const Counter_1 = __importDefault(require("../models/Counter"));
 const Order_1 = __importDefault(require("../models/Order"));
+const Blog_1 = __importDefault(require("../models/Blog"));
+const slugify_1 = __importDefault(require("../utils/slugify"));
+const autoIncrement_1 = require("../utils/autoIncrement");
 const force = process.env.SEED_FORCE === 'true';
 const categories = [
     { name: 'Vitamin', slug: 'vitamin' },
@@ -214,6 +217,91 @@ const promotions = [
         usageLimit: 200
     }
 ];
+const defaultUser = {
+    name: 'Xanh Nguyen',
+    email: 'xanh@gmail.com',
+    password: '12345678',
+    phone: '0987654321',
+    address: '123 Nguyen Trai, Hanoi'
+};
+const extraUsers = [
+    { name: 'Lan Nguyen', email: 'lan@gmail.com', password: '12345678', phone: '0900000001' },
+    { name: 'Minh Tran', email: 'minh@gmail.com', password: '12345678', phone: '0900000002' },
+    { name: 'Hoa Le', email: 'hoa@gmail.com', password: '12345678', phone: '0900000003' },
+    { name: 'Tuan Pham', email: 'tuan@gmail.com', password: '12345678', phone: '0900000004' }
+];
+const blogs = [
+    {
+        title: 'Top 5 thực phẩm bổ sung cho mùa đông khỏe mạnh',
+        content: 'Nội dung bài viết về các loại vitamin D, Omega-3, kẽm...',
+        excerpt: 'Vitamin D, Omega-3, kẽm… là bộ ba nên có vào mùa đông.',
+        thumbnail: 'https://placehold.co/800x450?text=Winter+Supplements',
+        tags: ['vitamin', 'omega3', 'health']
+    },
+    {
+        title: 'Hướng dẫn chọn collagen phù hợp cho da',
+        content: 'Phân biệt collagen type 1,2,3 và cách dùng tối ưu.',
+        excerpt: 'Collagen type 1,2,3 khác nhau thế nào và dùng ra sao?',
+        thumbnail: 'https://placehold.co/800x450?text=Collagen+Guide',
+        tags: ['collagen', 'beauty']
+    },
+    {
+        title: '5 mẹo hỗ trợ giảm cân an toàn',
+        content: 'Ưu tiên protein, ngủ đủ giấc, thêm CLA và trà xanh...',
+        excerpt: 'Kết hợp ăn uống, ngủ, vận động và bổ sung CLA/trà xanh.',
+        thumbnail: 'https://placehold.co/800x450?text=Weight+Loss+Tips',
+        tags: ['weight-loss', 'green-tea']
+    },
+    {
+        title: 'Probiotic có thật sự cần thiết?',
+        content: 'Lợi ích cho tiêu hóa, miễn dịch và liều dùng khuyến nghị.',
+        excerpt: 'Men vi sinh giúp cân bằng hệ vi khuẩn đường ruột.',
+        thumbnail: 'https://placehold.co/800x450?text=Probiotic',
+        tags: ['digestive', 'probiotic']
+    },
+    {
+        title: 'Bảo vệ tim mạch với Omega-3',
+        content: 'DHA/EPA là gì, liều khuyến nghị và lưu ý khi dùng.',
+        excerpt: 'Omega-3 hỗ trợ tim mạch, trí não và giảm viêm.',
+        thumbnail: 'https://placehold.co/800x450?text=Omega+3',
+        tags: ['heart', 'omega3']
+    },
+    {
+        title: 'Dấu hiệu thiếu kẽm và cách bổ sung',
+        content: 'Rụng tóc, móng giòn, giảm miễn dịch là dấu hiệu thiếu kẽm.',
+        excerpt: 'Kẽm giúp miễn dịch và làn da khỏe.',
+        thumbnail: 'https://placehold.co/800x450?text=Zinc',
+        tags: ['immunity', 'zinc']
+    },
+    {
+        title: 'Melatonin: hỗ trợ giấc ngủ tự nhiên',
+        content: 'Cơ chế hoạt động, liều dùng, khi nào nên dùng melatonin.',
+        excerpt: 'Melatonin giúp ngủ ngon hơn, dùng đúng liều và thời điểm.',
+        thumbnail: 'https://placehold.co/800x450?text=Melatonin',
+        tags: ['sleep', 'melatonin']
+    },
+    {
+        title: 'Biotin và mái tóc chắc khỏe',
+        content: 'Biotin hỗ trợ tóc, móng và chuyển hóa năng lượng.',
+        excerpt: 'Bổ sung biotin đúng liều để tóc và móng khỏe hơn.',
+        thumbnail: 'https://placehold.co/800x450?text=Biotin',
+        tags: ['beauty', 'hair']
+    },
+    {
+        title: 'Enzyme tiêu hóa có cần cho người lớn?',
+        content: 'Khi ăn nhiều đạm/chất béo, enzyme hỗ trợ tiêu hóa tốt hơn.',
+        excerpt: 'Enzyme hữu ích cho bữa ăn giàu đạm, giảm đầy bụng.',
+        thumbnail: 'https://placehold.co/800x450?text=Digestive+Enzymes',
+        tags: ['digestive', 'enzymes']
+    },
+    {
+        title: 'CoQ10: nguồn năng lượng cho tế bào',
+        content: 'CoQ10 hỗ trợ tim mạch, năng lượng và chống oxy hóa.',
+        excerpt: 'CoQ10 tốt cho tim, đặc biệt người lớn tuổi.',
+        thumbnail: 'https://placehold.co/800x450?text=CoQ10',
+        tags: ['heart', 'coq10']
+    }
+];
 const buildOrder = (userId, products, date, items) => {
     const orderItems = items.map((item) => {
         const product = products.find((p) => p.productId === item.productId);
@@ -243,13 +331,57 @@ const buildOrder = (userId, products, date, items) => {
 const seed = async () => {
     await mongoose_1.default.connect(env_1.default.mongoUri);
     logger_1.default.info('Connected to MongoDB');
-    const [productCount, categoryCount, userCount] = await Promise.all([
+    const buildBlogsWithIds = async () => {
+        const docs = [];
+        for (const [index, blog] of blogs.entries()) {
+            const slug = (0, slugify_1.default)(blog.title) || `blog-${index + 1}`;
+            const blogId = await (0, autoIncrement_1.getNextSequence)('blogs');
+            docs.push({ ...blog, slug, blogId });
+        }
+        return docs;
+    };
+    const ensureDefaultUsers = async () => {
+        const usersToEnsure = [defaultUser, ...extraUsers];
+        for (const userPayload of usersToEnsure) {
+            const exists = await User_1.default.findOne({ email: userPayload.email }).exec();
+            if (!exists) {
+                await User_1.default.create(userPayload);
+                logger_1.default.info('Seeded user %s', userPayload.email);
+            }
+        }
+        const adminExists = await Admin_1.default.findOne({ email: 'admin@gmail.com' }).exec();
+        if (!adminExists) {
+            await Admin_1.default.create({ email: 'admin@gmail.com', password: '12345678' });
+            logger_1.default.info('Seeded admin %s', 'admin@gmail.com');
+        }
+    };
+    const [productCount, categoryCount, userCount, blogCount] = await Promise.all([
         Product_1.default.countDocuments(),
         Category_1.default.countDocuments(),
-        User_1.default.countDocuments()
+        User_1.default.countDocuments(),
+        Blog_1.default.countDocuments()
     ]);
     if (!force && (productCount > 0 || categoryCount > 0 || userCount > 0)) {
-        logger_1.default.warn('Existing data detected (products: %d, categories: %d, users: %d). Skip seeding to avoid overwriting uploaded images. Set SEED_FORCE=true to reseed from scratch.', productCount, categoryCount, userCount);
+        await ensureDefaultUsers();
+        let added = 0;
+        if (blogCount === 0) {
+            const blogsWithIds = await buildBlogsWithIds();
+            await Blog_1.default.insertMany(blogsWithIds);
+            added = blogs.length;
+        }
+        else {
+            // Top up missing blogs if some already exist
+            for (const [index, blog] of blogs.entries()) {
+                const slug = (0, slugify_1.default)(blog.title) || `blog-${index + 1}`;
+                const exists = await Blog_1.default.findOne({ slug }).exec();
+                if (!exists) {
+                    const blogId = await (0, autoIncrement_1.getNextSequence)('blogs');
+                    await Blog_1.default.create({ ...blog, slug, blogId });
+                    added += 1;
+                }
+            }
+        }
+        logger_1.default.info('Existing data detected (products: %d, categories: %d, users: %d). Added %d blogs.', productCount, categoryCount, userCount, added);
         await mongoose_1.default.disconnect();
         return;
     }
@@ -259,22 +391,11 @@ const seed = async () => {
         Category_1.default.deleteMany({}),
         Product_1.default.deleteMany({}),
         Promotion_1.default.deleteMany({}),
+        Blog_1.default.deleteMany({}),
         Counter_1.default.deleteMany({})
     ]);
     const admin = await Admin_1.default.create({ email: 'admin@gmail.com', password: '12345678' });
-    const user = await User_1.default.create({
-        name: 'Xanh Nguyen',
-        email: 'xanh@gmail.com',
-        password: '12345678',
-        phone: '0987654321',
-        address: '123 Nguyen Trai, Hanoi'
-    });
-    const extraUsers = [
-        { name: 'Lan Nguyen', email: 'lan@gmail.com', password: '12345678', phone: '0900000001' },
-        { name: 'Minh Tran', email: 'minh@gmail.com', password: '12345678', phone: '0900000002' },
-        { name: 'Hoa Le', email: 'hoa@gmail.com', password: '12345678', phone: '0900000003' },
-        { name: 'Tuan Pham', email: 'tuan@gmail.com', password: '12345678', phone: '0900000004' }
-    ];
+    const user = await User_1.default.create(defaultUser);
     await User_1.default.insertMany(extraUsers);
     logger_1.default.info('Created admin %s and user %s', admin.email, user.email);
     const createdCategories = [];
@@ -300,6 +421,11 @@ const seed = async () => {
     logger_1.default.info('Seeded products');
     await Promotion_1.default.insertMany(promotions);
     logger_1.default.info('Seeded promotions');
+    const blogsWithIds = await buildBlogsWithIds();
+    for (const blogDoc of blogsWithIds) {
+        await Blog_1.default.create(blogDoc);
+    }
+    logger_1.default.info('Seeded blogs (%d)', blogs.length);
     const seededProducts = await Product_1.default.find({}).exec();
     const year = new Date().getFullYear();
     const ordersPayload = [
