@@ -13,8 +13,14 @@ import swaggerSpec from './docs/swagger';
 
 const app = express();
 
+const corsOptions: cors.CorsOptions = {
+  origin: env.nodeEnv === 'production' ? ['https://smallhouse.vn'] : true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-refresh-token'],
+  exposedHeaders: ['x-access-token']
+};
+
 app.use(helmet());
-app.use(cors({ origin: env.nodeEnv === 'production' ? ['https://smallhouse.vn'] : true }));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

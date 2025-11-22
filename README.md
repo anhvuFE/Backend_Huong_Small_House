@@ -107,4 +107,5 @@ Every module uses dedicated service classes to keep controllers thin and maintai
 - SMTP service sends HTML confirmation emails for every order.
 - Cloudinary integration is configured automatically when `CLOUDINARY_URL` is available.
 - Product images (`POST/PUT /products`) and profile avatar upload (`PUT /profile`) accept `multipart/form-data` and are pushed to Cloudinary. Provide `CLOUDINARY_FOLDER` to group uploads (defaults to `small-house`).
+- Auto-refresh access token: send `x-refresh-token: <refreshToken>` header alongside an expired access token; middleware will issue a new access token in response header `x-access-token`.
 - Use the `health` endpoint (`GET /health`) for uptime checks.
