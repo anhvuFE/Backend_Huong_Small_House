@@ -24,7 +24,12 @@ const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100
 });
-app.use(limiter);
+if (env_1.default.nodeEnv === 'production') {
+    app.use(limiter);
+}
+else {
+    logger_1.default.info('Rate limiting is disabled in non-production environments');
+}
 app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
 });

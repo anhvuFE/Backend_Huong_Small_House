@@ -583,6 +583,23 @@ const swaggerDefinition = {
         }
       }
     },
+    '/auth/change-password': {
+      put: {
+        tags: ['Auth'],
+        summary: 'Đổi mật khẩu (đã đăng nhập)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/ChangePasswordRequest' } }
+          }
+        },
+        responses: {
+          200: successResponse('Đổi mật khẩu thành công'),
+          400: errorResponse('Mật khẩu hiện tại không đúng')
+        }
+      }
+    },
     '/products': {
       get: {
         tags: ['Products'],

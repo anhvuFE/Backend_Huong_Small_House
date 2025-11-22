@@ -231,7 +231,9 @@ const seed = async () => {
             { productId: seededProducts[6].productId, quantity: 1 }
         ])
     ];
-    await Order_1.default.insertMany(ordersPayload);
+    for (const order of ordersPayload) {
+        await Order_1.default.create(order);
+    }
     logger_1.default.info('Seeded %d orders across months', ordersPayload.length);
     await mongoose_1.default.disconnect();
     logger_1.default.info('Seed finished');

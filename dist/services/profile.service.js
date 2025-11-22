@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const User_1 = __importDefault(require("../models/User"));
+const Admin_1 = __importDefault(require("../models/Admin"));
 const appError_1 = __importDefault(require("../utils/appError"));
 class ProfileService {
     async getProfile(userId) {
@@ -22,16 +23,19 @@ class ProfileService {
         return user;
     }
     async changePassword(userId, currentPassword, newPassword) {
-        const user = await User_1.default.findById(userId).select('+password');
-        if (!user) {
+        let account = await User_1.default.findById(userId).select('+password');
+        if (!account) {
+            account = await Admin_1.default.findById(userId).select('+password');
+        }
+        if (!account) {
             throw new appError_1.default('User not found', 404);
         }
-        const match = await user.comparePassword(currentPassword);
+        const match = await account.comparePassword(currentPassword);
         if (!match) {
             throw new appError_1.default('Mật khẩu hiện tại không đúng', 400);
         }
-        user.password = newPassword;
-        await user.save();
+        account.password = newPassword;
+        await account.save();
     }
 }
 exports.default = new ProfileService();
