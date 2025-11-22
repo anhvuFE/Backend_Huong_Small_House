@@ -60,7 +60,8 @@ const swaggerDefinition = {
     { name: 'Feedback', description: 'Phản hồi của người dùng' },
     { name: 'Consultations', description: 'Tư vấn, trao đổi giữa khách và admin' },
     { name: 'Users', description: 'Quản lý người dùng (admin)' },
-    { name: 'Profile', description: 'Thông tin cá nhân người dùng' }
+    { name: 'Profile', description: 'Thông tin cá nhân người dùng' },
+    { name: 'Blogs', description: 'Bài viết / tin tức' }
   ],
   components: {
     securitySchemes: {
@@ -156,6 +157,32 @@ const swaggerDefinition = {
             type: 'object',
             properties: {
               productId: { type: 'integer' }
+            }
+          }
+        ]
+      },
+      BlogRequest: {
+        type: 'object',
+        required: ['title', 'content'],
+        properties: {
+          title: { type: 'string' },
+          slug: { type: 'string' },
+          content: { type: 'string' },
+          excerpt: { type: 'string' },
+          thumbnail: { type: 'string' },
+          tags: { type: 'array', items: { type: 'string' } },
+          published: { type: 'boolean' }
+        }
+      },
+      Blog: {
+        allOf: [
+          { $ref: '#/components/schemas/BlogRequest' },
+          {
+            type: 'object',
+            properties: {
+              blogId: { type: 'integer' },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' }
             }
           }
         ]
@@ -726,6 +753,110 @@ const swaggerDefinition = {
         responses: {
           201: successResponse('Tạo danh mục thành công', { $ref: '#/components/schemas/Category' }),
           409: errorResponse('Danh mục đã tồn tại')
+        }
+      }
+    },
+    '/blogs': {
+      get: {
+        tags: ['Blogs'],
+        summary: 'Danh sách blog (public)',
+        responses: {
+          200: successResponse('Danh sách blog', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Blog' }
+          })
+        }
+      },
+      post: {
+        tags: ['Blogs'],
+        summary: 'Tạo blog (admin)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/BlogRequest' } },
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  slug: { type: 'string' },
+                  content: { type: 'string' },
+                  excerpt: { type: 'string' },
+                  thumbnail: { type: 'string', format: 'binary' },
+                  tags: { type: 'string', description: 'JSON hoặc lặp tags[]' },
+                  published: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          201: successResponse('Tạo blog thành công', { $ref: '#/components/schemas/Blog' }),
+          409: errorResponse('Slug đã tồn tại')
+        }
+      }
+    },
+    '/blogs/all': {
+      get: {
+        tags: ['Blogs'],
+        summary: 'Danh sách blog (bao gồm unpublished - admin)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: successResponse('Danh sách blog', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Blog' }
+          })
+        }
+      }
+    },
+    '/blogs/{blogId}': {
+      get: {
+        tags: ['Blogs'],
+        summary: 'Chi tiết blog',
+        parameters: [{ name: 'blogId', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: {
+          200: successResponse('Chi tiết blog', { $ref: '#/components/schemas/Blog' }),
+          404: errorResponse('Không tìm thấy blog')
+        }
+      },
+      put: {
+        tags: ['Blogs'],
+        summary: 'Cập nhật blog (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'blogId', in: 'path', required: true, schema: { type: 'integer' } }],
+        requestBody: {
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/BlogRequest' } },
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  slug: { type: 'string' },
+                  content: { type: 'string' },
+                  excerpt: { type: 'string' },
+                  thumbnail: { type: 'string', format: 'binary' },
+                  tags: { type: 'string', description: 'JSON hoặc lặp tags[]' },
+                  published: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          200: successResponse('Cập nhật blog', { $ref: '#/components/schemas/Blog' }),
+          404: errorResponse('Không tìm thấy blog')
+        }
+      },
+      delete: {
+        tags: ['Blogs'],
+        summary: 'Xóa blog (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'blogId', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: {
+          204: noContentResponse('Đã xóa'),
+          404: errorResponse('Không tìm thấy blog')
         }
       }
     },
