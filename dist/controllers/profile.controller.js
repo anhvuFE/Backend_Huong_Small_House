@@ -5,13 +5,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.changePassword = exports.updateProfile = exports.getProfile = void 0;
 const profile_service_1 = __importDefault(require("../services/profile.service"));
+const cloudinaryUpload_1 = require("../utils/cloudinaryUpload");
 const getProfile = async (req, res) => {
     const profile = await profile_service_1.default.getProfile(req.user.id);
     res.json({ success: true, data: profile });
 };
 exports.getProfile = getProfile;
 const updateProfile = async (req, res) => {
-    const profile = await profile_service_1.default.updateProfile(req.user.id, req.body);
+    const payload = { ...req.body };
+    if (req.file) {
+        const uploaded = await (0, cloudinaryUpload_1.uploadImageBuffer)(req.file, 'avatars');
+        payload.avatar = uploaded.url;
+    }
+    const profile = await profile_service_1.default.updateProfile(req.user.id, payload);
     res.json({ success: true, data: profile });
 };
 exports.updateProfile = updateProfile;

@@ -5,6 +5,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createCategory = exports.listCategories = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getProduct = exports.listProducts = void 0;
 const product_service_1 = __importDefault(require("../services/product.service"));
+const cloudinaryUpload_1 = require("../utils/cloudinaryUpload");
+const parseImagesField = (value) => {
+    if (!value)
+        return [];
+    if (Array.isArray(value))
+        return value;
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        }
+        catch (error) {
+            return [];
+        }
+    }
+    return [];
+};
 const listProducts = async (_req, res) => {
     const products = await product_service_1.default.listProducts();
     res.json({ success: true, data: products });
@@ -21,12 +38,32 @@ const getProduct = async (req, res) => {
 };
 exports.getProduct = getProduct;
 const createProduct = async (req, res) => {
-    const product = await product_service_1.default.createProduct(req.body);
+    const baseImages = parseImagesField(req.body.images);
+    const files = req.files || [];
+    const uploaded = files.length ? await (0, cloudinaryUpload_1.uploadImagesBuffer)(files, 'products') : [];
+    const images = [
+        ...baseImages,
+        ...uploaded.map((img) => ({ url: img.url }))
+    ];
+    const product = await product_service_1.default.createProduct({ ...req.body, images });
     res.status(201).json({ success: true, data: product });
 };
 exports.createProduct = createProduct;
 const updateProduct = async (req, res) => {
-    const product = await product_service_1.default.updateProduct(Number(req.params.productId), req.body);
+    const rawImages = req.body.images;
+    const baseImages = parseImagesField(rawImages);
+    const files = req.files || [];
+    const uploaded = files.length ? await (0, cloudinaryUpload_1.uploadImagesBuffer)(files, 'products') : [];
+    const images = [
+        ...baseImages,
+        ...uploaded.map((img) => ({ url: img.url }))
+    ];
+    const payload = rawImages !== undefined || files.length
+        ? { ...req.body, images }
+        : { ...req.body };
+    const product = await product_service_1.default.updateProduct(Number(req.params.productId), {
+        ...payload
+    });
     res.json({ success: true, data: product });
 };
 exports.updateProduct = updateProduct;

@@ -121,6 +121,7 @@ const swaggerDefinition = {
               userId: { type: 'integer' },
               email: { type: 'string' },
               name: { type: 'string' },
+              avatar: { type: 'string' },
               role: { type: 'string' },
               status: { type: 'string', enum: ['active', 'locked'] }
             }
@@ -385,6 +386,7 @@ const swaggerDefinition = {
           _id: { type: 'string' },
           name: { type: 'string' },
           email: { type: 'string' },
+          avatar: { type: 'string' },
           phone: { type: 'string' },
           address: { type: 'string' }
         }
@@ -393,6 +395,7 @@ const swaggerDefinition = {
         type: 'object',
         properties: {
           name: { type: 'string' },
+          avatar: { type: 'string', description: 'URL ảnh đã upload hoặc để trống khi dùng form-data' },
           phone: { type: 'string' },
           address: { type: 'string' }
         }
@@ -618,7 +621,24 @@ const swaggerDefinition = {
         requestBody: {
           required: true,
           content: {
-            'application/json': { schema: { $ref: '#/components/schemas/ProductRequest' } }
+            'application/json': { schema: { $ref: '#/components/schemas/ProductRequest' } },
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  brand: { type: 'string' },
+                  categoryId: { type: 'integer' },
+                  description: { type: 'string' },
+                  price: { type: 'number' },
+                  stock: { type: 'number' },
+                  images: {
+                    type: 'array',
+                    items: { type: 'string', format: 'binary' }
+                  }
+                }
+              }
+            }
           }
         },
         responses: {
@@ -644,7 +664,24 @@ const swaggerDefinition = {
         requestBody: {
           required: true,
           content: {
-            'application/json': { schema: { $ref: '#/components/schemas/ProductRequest' } }
+            'application/json': { schema: { $ref: '#/components/schemas/ProductRequest' } },
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  brand: { type: 'string' },
+                  categoryId: { type: 'integer' },
+                  description: { type: 'string' },
+                  price: { type: 'number' },
+                  stock: { type: 'number' },
+                  images: {
+                    type: 'array',
+                    items: { type: 'string', format: 'binary' }
+                  }
+                }
+              }
+            }
           }
         },
         responses: {
@@ -1126,7 +1163,20 @@ const swaggerDefinition = {
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateProfileRequest' } } }
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/UpdateProfileRequest' } },
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  phone: { type: 'string' },
+                  address: { type: 'string' },
+                  avatar: { type: 'string', format: 'binary' }
+                }
+              }
+            }
+          }
         },
         responses: {
           200: successResponse('Đã cập nhật', { $ref: '#/components/schemas/Profile' })

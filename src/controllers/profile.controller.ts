@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import profileService from '../services/profile.service';
 import { AuthRequest } from '../middlewares/auth';
+import { uploadImageBuffer } from '../utils/cloudinaryUpload';
 
 export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   const profile = await profileService.getProfile(req.user!.id);
@@ -8,7 +9,14 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
-  const profile = await profileService.updateProfile(req.user!.id, req.body);
+  const payload = { ...req.body };
+
+  if (req.file) {
+    const uploaded = await uploadImageBuffer(req.file, 'avatars');
+    payload.avatar = uploaded.url;
+  }
+
+  const profile = await profileService.updateProfile(req.user!.id, payload);
   res.json({ success: true, data: profile });
 };
 
