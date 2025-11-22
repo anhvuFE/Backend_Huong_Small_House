@@ -16,8 +16,13 @@ const errorHandler_1 = require("./middlewares/errorHandler");
 const logger_1 = __importDefault(require("./utils/logger"));
 const swagger_1 = __importDefault(require("./docs/swagger"));
 const app = (0, express_1.default)();
+const corsOptions = {
+    origin: env_1.default.nodeEnv === 'production' ? ['https://smallhouse.vn'] : true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-refresh-token'],
+    exposedHeaders: ['x-access-token']
+};
 app.use((0, helmet_1.default)());
-app.use((0, cors_1.default)({ origin: env_1.default.nodeEnv === 'production' ? ['https://smallhouse.vn'] : true }));
+app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 const limiter = (0, express_rate_limit_1.default)({

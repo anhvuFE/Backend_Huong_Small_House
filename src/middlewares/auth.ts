@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import env from '../config/env';
 import AppError from '../utils/appError';
 
@@ -8,9 +8,24 @@ export interface AuthRequest extends Request {
     id: string;
     role: string;
   };
+  newAccessToken?: string;
 }
 
-export const authenticate = (req: AuthRequest, _res: Response, next: NextFunction): void => {
+const refreshAccessToken = (refreshToken: string): { id: string; role: string; accessToken: string } | null => {
+  try {
+    const payload = jwt.verify(refreshToken, env.jwt.refreshSecret as Secret) as { id: string; role: string };
+    const accessToken = jwt.sign(
+      { id: payload.id, role: payload.role },
+      env.jwt.secret as Secret,
+      { expiresIn: env.jwt.expiresIn as SignOptions['expiresIn'] }
+    );
+    return { id: payload.id, role: payload.role, accessToken };
+  } catch (error) {
+    return null;
+  }
+};
+
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.split(' ')[1] : undefined;
 
@@ -19,10 +34,24 @@ export const authenticate = (req: AuthRequest, _res: Response, next: NextFunctio
   }
 
   try {
-    const payload = jwt.verify(token, env.jwt.secret) as { id: string; role: string };
+    const payload = jwt.verify(token, env.jwt.secret as Secret) as { id: string; role: string };
     req.user = payload;
     next();
-  } catch (error) {
+  } catch (error: unknown) {
+    const refreshHeader = req.headers['x-refresh-token'];
+    const refreshToken = typeof refreshHeader === 'string' ? refreshHeader : undefined;
+
+    if (error instanceof jwt.TokenExpiredError && refreshToken) {
+      const refreshed = refreshAccessToken(refreshToken);
+      if (refreshed) {
+        req.user = { id: refreshed.id, role: refreshed.role };
+        req.newAccessToken = refreshed.accessToken;
+        res.setHeader('x-access-token', refreshed.accessToken);
+        next();
+        return;
+      }
+    }
+
     throw new AppError('Invalid token', 401);
   }
 };
