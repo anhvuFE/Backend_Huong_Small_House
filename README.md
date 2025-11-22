@@ -69,6 +69,8 @@ Use the provided script to bootstrap MongoDB with counters, categories, products
 npm run seed
 ```
 
+> Lưu ý: Script seed mặc định **không** chạy nếu đã có dữ liệu để tránh xoá ảnh đã upload. Nếu muốn seed lại từ đầu (sẽ xoá sạch và ghi đè), chạy với `SEED_FORCE=true npm run seed`.
+
 Seeded accounts:
 
 - Customer: `xanh@gmail.com` / `12345678`
@@ -104,4 +106,5 @@ Every module uses dedicated service classes to keep controllers thin and maintai
 - Sepay checkout links are returned from the order creation/service when `paymentMethod === 'Sepay'`.
 - SMTP service sends HTML confirmation emails for every order.
 - Cloudinary integration is configured automatically when `CLOUDINARY_URL` is available.
+- Product images (`POST/PUT /products`) and profile avatar upload (`PUT /profile`) accept `multipart/form-data` and are pushed to Cloudinary. Provide `CLOUDINARY_FOLDER` to group uploads (defaults to `small-house`).
 - Use the `health` endpoint (`GET /health`) for uptime checks.

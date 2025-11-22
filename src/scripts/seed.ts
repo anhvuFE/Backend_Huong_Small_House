@@ -9,6 +9,8 @@ import Promotion from '../models/Promotion';
 import Counter from '../models/Counter';
 import Order, { IOrderItem } from '../models/Order';
 
+const force = process.env.SEED_FORCE === 'true';
+
 const categories = [
   { name: 'Vitamin', slug: 'vitamin' },
   { name: 'Collagen', slug: 'collagen' },
@@ -145,6 +147,23 @@ const buildOrder = (userId: string, products: IProduct[], date: Date, items: Arr
 const seed = async (): Promise<void> => {
   await mongoose.connect(env.mongoUri);
   logger.info('Connected to MongoDB');
+
+  const [productCount, categoryCount, userCount] = await Promise.all([
+    Product.countDocuments(),
+    Category.countDocuments(),
+    User.countDocuments()
+  ]);
+
+  if (!force && (productCount > 0 || categoryCount > 0 || userCount > 0)) {
+    logger.warn(
+      'Existing data detected (products: %d, categories: %d, users: %d). Skip seeding to avoid overwriting uploaded images. Set SEED_FORCE=true to reseed from scratch.',
+      productCount,
+      categoryCount,
+      userCount
+    );
+    await mongoose.disconnect();
+    return;
+  }
 
   await Promise.all([
     User.deleteMany({}),

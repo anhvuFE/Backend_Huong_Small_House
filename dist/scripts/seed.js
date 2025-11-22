@@ -13,6 +13,7 @@ const Product_1 = __importDefault(require("../models/Product"));
 const Promotion_1 = __importDefault(require("../models/Promotion"));
 const Counter_1 = __importDefault(require("../models/Counter"));
 const Order_1 = __importDefault(require("../models/Order"));
+const force = process.env.SEED_FORCE === 'true';
 const categories = [
     { name: 'Vitamin', slug: 'vitamin' },
     { name: 'Collagen', slug: 'collagen' },
@@ -143,6 +144,16 @@ const buildOrder = (userId, products, date, items) => {
 const seed = async () => {
     await mongoose_1.default.connect(env_1.default.mongoUri);
     logger_1.default.info('Connected to MongoDB');
+    const [productCount, categoryCount, userCount] = await Promise.all([
+        Product_1.default.countDocuments(),
+        Category_1.default.countDocuments(),
+        User_1.default.countDocuments()
+    ]);
+    if (!force && (productCount > 0 || categoryCount > 0 || userCount > 0)) {
+        logger_1.default.warn('Existing data detected (products: %d, categories: %d, users: %d). Skip seeding to avoid overwriting uploaded images. Set SEED_FORCE=true to reseed from scratch.', productCount, categoryCount, userCount);
+        await mongoose_1.default.disconnect();
+        return;
+    }
     await Promise.all([
         User_1.default.deleteMany({}),
         Admin_1.default.deleteMany({}),

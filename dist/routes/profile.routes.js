@@ -8,9 +8,11 @@ const joi_1 = __importDefault(require("joi"));
 const auth_1 = require("../middlewares/auth");
 const validate_1 = require("../middlewares/validate");
 const profile_controller_1 = require("../controllers/profile.controller");
+const upload_1 = require("../middlewares/upload");
 const router = (0, express_1.Router)();
 const updateProfileSchema = joi_1.default.object({
     name: joi_1.default.string().optional(),
+    avatar: joi_1.default.string().uri().optional(),
     phone: joi_1.default.string().optional(),
     address: joi_1.default.string().optional()
 });
@@ -19,7 +21,7 @@ const changePasswordSchema = joi_1.default.object({
     newPassword: joi_1.default.string().min(6).required()
 });
 router.get('/', auth_1.authenticate, profile_controller_1.getProfile);
-router.put('/', auth_1.authenticate, (0, validate_1.validate)(updateProfileSchema), profile_controller_1.updateProfile);
+router.put('/', auth_1.authenticate, (0, upload_1.uploadSingleImage)('avatar'), (0, validate_1.validate)(updateProfileSchema), profile_controller_1.updateProfile);
 router.put('/password', auth_1.authenticate, (0, validate_1.validate)(changePasswordSchema), profile_controller_1.changePassword);
 exports.default = router;
 //# sourceMappingURL=profile.routes.js.map

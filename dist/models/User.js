@@ -11,6 +11,7 @@ const userSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },
+    avatar: String,
     phone: String,
     address: String,
     provider: { type: String, enum: ['local', 'google'], default: 'local' },

@@ -7,6 +7,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
+  avatar?: string;
   phone?: string;
   address?: string;
   provider: 'local' | 'google';
@@ -22,6 +23,7 @@ const userSchema = new Schema<IUser>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },
+    avatar: String,
     phone: String,
     address: String,
     provider: { type: String, enum: ['local', 'google'], default: 'local' },
