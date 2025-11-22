@@ -1,4 +1,5 @@
 import User, { IUser } from '../models/User';
+import Admin, { IAdmin } from '../models/Admin';
 import AppError from '../utils/appError';
 
 class ProfileService {
@@ -21,16 +22,23 @@ class ProfileService {
   }
 
   async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
-    const user = await User.findById(userId).select('+password');
-    if (!user) {
+    let account: (IUser | IAdmin) | null = await User.findById(userId).select('+password');
+
+    if (!account) {
+      account = await Admin.findById(userId).select('+password');
+    }
+
+    if (!account) {
       throw new AppError('User not found', 404);
     }
-    const match = await user.comparePassword(currentPassword);
+
+    const match = await account.comparePassword(currentPassword);
     if (!match) {
       throw new AppError('Mật khẩu hiện tại không đúng', 400);
     }
-    user.password = newPassword;
-    await user.save();
+
+    account.password = newPassword;
+    await account.save();
   }
 }
 

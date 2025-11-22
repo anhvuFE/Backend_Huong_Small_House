@@ -78,7 +78,7 @@ Seeded accounts:
 
 | Module      | Key Endpoints (prefixed with `/api`)                                        |
 |-------------|-----------------------------------------------------------------------------|
-| Auth        | `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/forgot-password`, `POST /auth/reset-password` |
+| Auth        | `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `PUT /auth/change-password` |
 | Products    | `GET /products`, `GET /products/{id}`, `POST /products`, `PUT /products/{id}`, `DELETE /products/{id}` |
 | Categories  | `GET /products/categories/all`, `POST /products/categories`                 |
 | Orders      | `POST /orders`, `GET /orders/me`, `GET /orders/{id}`, `GET /orders` (admin), `PATCH /orders/{id}/status` |

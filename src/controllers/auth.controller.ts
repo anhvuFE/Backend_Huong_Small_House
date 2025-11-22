@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import authService from '../services/auth.service';
+import profileService from '../services/profile.service';
+import { AuthRequest } from '../middlewares/auth';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   const result = await authService.register(req.body);
@@ -28,4 +30,9 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
   const { email, token, password } = req.body;
   await authService.resetPassword(email, token, password);
   res.json({ success: true, message: 'Đặt lại mật khẩu thành công' });
+};
+
+export const changePassword = async (req: AuthRequest, res: Response): Promise<void> => {
+  await profileService.changePassword(req.user!.id, req.body.currentPassword, req.body.newPassword);
+  res.json({ success: true, message: 'Đã cập nhật mật khẩu' });
 };

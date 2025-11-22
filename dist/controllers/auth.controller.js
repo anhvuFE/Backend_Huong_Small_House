@@ -3,8 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetPassword = exports.forgotPassword = exports.refresh = exports.login = exports.register = void 0;
+exports.changePassword = exports.resetPassword = exports.forgotPassword = exports.refresh = exports.login = exports.register = void 0;
 const auth_service_1 = __importDefault(require("../services/auth.service"));
+const profile_service_1 = __importDefault(require("../services/profile.service"));
 const register = async (req, res) => {
     const result = await auth_service_1.default.register(req.body);
     res.status(201).json({ success: true, data: result });
@@ -34,4 +35,9 @@ const resetPassword = async (req, res) => {
     res.json({ success: true, message: 'Đặt lại mật khẩu thành công' });
 };
 exports.resetPassword = resetPassword;
+const changePassword = async (req, res) => {
+    await profile_service_1.default.changePassword(req.user.id, req.body.currentPassword, req.body.newPassword);
+    res.json({ success: true, message: 'Đã cập nhật mật khẩu' });
+};
+exports.changePassword = changePassword;
 //# sourceMappingURL=auth.controller.js.map
