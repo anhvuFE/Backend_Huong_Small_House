@@ -74,6 +74,7 @@ npm run seed
 Seeded accounts:
 
 - Customer: `xanh@gmail.com` / `12345678`
+- Customers: `lan@gmail.com`, `minh@gmail.com`, `hoa@gmail.com`, `tuan@gmail.com` (password `12345678`)
 - Admin: `admin@gmail.com` / `12345678`
 
 ## API Overview

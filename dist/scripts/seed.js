@@ -269,6 +269,13 @@ const seed = async () => {
         phone: '0987654321',
         address: '123 Nguyen Trai, Hanoi'
     });
+    const extraUsers = [
+        { name: 'Lan Nguyen', email: 'lan@gmail.com', password: '12345678', phone: '0900000001' },
+        { name: 'Minh Tran', email: 'minh@gmail.com', password: '12345678', phone: '0900000002' },
+        { name: 'Hoa Le', email: 'hoa@gmail.com', password: '12345678', phone: '0900000003' },
+        { name: 'Tuan Pham', email: 'tuan@gmail.com', password: '12345678', phone: '0900000004' }
+    ];
+    await User_1.default.insertMany(extraUsers);
     logger_1.default.info('Created admin %s and user %s', admin.email, user.email);
     const createdCategories = [];
     for (const category of categories) {
