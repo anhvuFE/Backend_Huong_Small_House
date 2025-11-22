@@ -24,6 +24,7 @@ const categories = [
 ];
 
 const products = [
+  // Vitamin
   {
     name: 'Vitamin C 1000mg Kirkland',
     brand: 'Kirkland',
@@ -34,6 +35,16 @@ const products = [
     images: [{ url: 'https://placehold.co/600x400?text=Vitamin+C' }]
   },
   {
+    name: 'Vitamin D3 5000 IU',
+    brand: 'NOW Foods',
+    categorySlug: 'vitamin',
+    description: 'Bổ sung vitamin D3 hỗ trợ xương và miễn dịch.',
+    price: 320000,
+    stock: 120,
+    images: [{ url: 'https://placehold.co/600x400?text=Vitamin+D3' }]
+  },
+  // Collagen
+  {
     name: 'Collagen Youtheory Type 1 2 & 3',
     brand: 'Youtheory',
     categorySlug: 'collagen',
@@ -42,6 +53,16 @@ const products = [
     stock: 50,
     images: [{ url: 'https://placehold.co/600x400?text=Collagen' }]
   },
+  {
+    name: 'Collagen Peptides Powder Vital Proteins',
+    brand: 'Vital Proteins',
+    categorySlug: 'collagen',
+    description: 'Bột collagen peptides dễ pha, hỗ trợ da và khớp.',
+    price: 750000,
+    stock: 60,
+    images: [{ url: 'https://placehold.co/600x400?text=Collagen+Peptides' }]
+  },
+  // Xương khớp
   {
     name: 'Glucosamine Chondroitin MSM',
     brand: "Doctor's Best",
@@ -52,23 +73,15 @@ const products = [
     images: [{ url: 'https://placehold.co/600x400?text=Bone+Support' }]
   },
   {
-    name: 'Omega 3 Fish Oil 1000mg',
-    brand: 'Nature Made',
-    categorySlug: 'heart-health',
-    description: 'Dầu cá hỗ trợ tim mạch và trí não khỏe mạnh.',
-    price: 550000,
+    name: 'Calcium Magnesium Zinc with D3',
+    brand: 'Puritan Pride',
+    categorySlug: 'bone-support',
+    description: 'Bổ sung canxi, magie, kẽm và vitamin D3 cho xương chắc khỏe.',
+    price: 390000,
     stock: 80,
-    images: [{ url: 'https://placehold.co/600x400?text=Omega+3' }]
+    images: [{ url: 'https://placehold.co/600x400?text=Calcium+D3' }]
   },
-  {
-    name: 'Probiotics 50 Billion CFU',
-    brand: 'Garden of Life',
-    categorySlug: 'digestive',
-    description: 'Men vi sinh hỗ trợ hệ tiêu hóa khỏe mạnh.',
-    price: 890000,
-    stock: 40,
-    images: [{ url: 'https://placehold.co/600x400?text=Probiotic' }]
-  },
+  // Giảm cân
   {
     name: 'Viên uống giảm cân Green Tea Extract',
     brand: 'Applied Nutrition',
@@ -79,14 +92,72 @@ const products = [
     images: [{ url: 'https://placehold.co/600x400?text=Green+Tea' }]
   },
   {
-    name: 'Vitamin D3 5000 IU',
-    brand: 'NOW Foods',
-    categorySlug: 'vitamin',
-    description: 'Bổ sung vitamin D3 hỗ trợ xương và miễn dịch.',
-    price: 320000,
-    stock: 120,
-    images: [{ url: 'https://placehold.co/600x400?text=Vitamin+D3' }]
+    name: 'CLA 1000mg hỗ trợ chuyển hoá',
+    brand: 'MuscleTech',
+    categorySlug: 'weight-loss',
+    description: 'CLA giúp hỗ trợ chuyển hóa chất béo, kết hợp chế độ ăn lành mạnh.',
+    price: 510000,
+    stock: 70,
+    images: [{ url: 'https://placehold.co/600x400?text=CLA+1000mg' }]
   },
+  // Tăng đề kháng
+  {
+    name: 'Zinc Picolinate 50mg',
+    brand: 'NOW Foods',
+    categorySlug: 'immunity',
+    description: 'Kẽm hỗ trợ miễn dịch và sức khỏe tổng thể.',
+    price: 260000,
+    stock: 90,
+    images: [{ url: 'https://placehold.co/600x400?text=Zinc' }]
+  },
+  {
+    name: 'Elderberry Sambucus Gummies',
+    brand: 'Nature Made',
+    categorySlug: 'immunity',
+    description: 'Kẹo dẻo chiết xuất elderberry tăng cường miễn dịch.',
+    price: 340000,
+    stock: 110,
+    images: [{ url: 'https://placehold.co/600x400?text=Elderberry' }]
+  },
+  // Tiêu hóa
+  {
+    name: 'Probiotics 50 Billion CFU',
+    brand: 'Garden of Life',
+    categorySlug: 'digestive',
+    description: 'Men vi sinh hỗ trợ hệ tiêu hóa khỏe mạnh.',
+    price: 890000,
+    stock: 40,
+    images: [{ url: 'https://placehold.co/600x400?text=Probiotic' }]
+  },
+  {
+    name: 'Digestive Enzymes Ultra',
+    brand: 'NOW Foods',
+    categorySlug: 'digestive',
+    description: 'Enzyme hỗ trợ tiêu hóa cho bữa ăn nhiều đạm và chất béo.',
+    price: 480000,
+    stock: 65,
+    images: [{ url: 'https://placehold.co/600x400?text=Digestive+Enzymes' }]
+  },
+  // Tim mạch
+  {
+    name: 'Omega 3 Fish Oil 1000mg',
+    brand: 'Nature Made',
+    categorySlug: 'heart-health',
+    description: 'Dầu cá hỗ trợ tim mạch và trí não khỏe mạnh.',
+    price: 550000,
+    stock: 80,
+    images: [{ url: 'https://placehold.co/600x400?text=Omega+3' }]
+  },
+  {
+    name: 'CoQ10 200mg Ubiquinone',
+    brand: 'Qunol',
+    categorySlug: 'heart-health',
+    description: 'Hỗ trợ sức khỏe tim mạch và năng lượng tế bào.',
+    price: 620000,
+    stock: 55,
+    images: [{ url: 'https://placehold.co/600x400?text=CoQ10' }]
+  },
+  // Làm đẹp
   {
     name: 'Biotin 10000mcg cho tóc và móng',
     brand: 'Sports Research',
@@ -95,6 +166,34 @@ const products = [
     price: 380000,
     stock: 70,
     images: [{ url: 'https://placehold.co/600x400?text=Biotin' }]
+  },
+  {
+    name: 'Hyaluronic Acid with Vitamin C',
+    brand: 'Puritan Pride',
+    categorySlug: 'beauty',
+    description: 'Hỗ trợ cấp ẩm và đàn hồi cho da.',
+    price: 350000,
+    stock: 85,
+    images: [{ url: 'https://placehold.co/600x400?text=Hyaluronic' }]
+  },
+  // Giấc ngủ
+  {
+    name: 'Melatonin 5mg Fast Dissolve',
+    brand: 'Natrol',
+    categorySlug: 'sleep',
+    description: 'Hỗ trợ giấc ngủ ngon và sâu hơn.',
+    price: 210000,
+    stock: 95,
+    images: [{ url: 'https://placehold.co/600x400?text=Melatonin' }]
+  },
+  {
+    name: 'Magnesium Glycinate Calm',
+    brand: 'Doctor\'s Best',
+    categorySlug: 'sleep',
+    description: 'Magie giúp thư giãn cơ và cải thiện chất lượng giấc ngủ.',
+    price: 330000,
+    stock: 75,
+    images: [{ url: 'https://placehold.co/600x400?text=Magnesium+Calm' }]
   }
 ];
 
