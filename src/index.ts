@@ -2,6 +2,7 @@ import 'express-async-errors';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { connectDatabase } from './config/database';
@@ -16,11 +17,13 @@ const app = express();
 const corsOptions: cors.CorsOptions = {
   origin: env.nodeEnv === 'production' ? ['https://smallhouse.vn'] : true,
   allowedHeaders: ['Content-Type', 'Authorization', 'x-refresh-token'],
-  exposedHeaders: ['x-access-token']
+  exposedHeaders: ['x-access-token'],
+  credentials: true
 };
 
 app.use(helmet());
 app.use(cors(corsOptions));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

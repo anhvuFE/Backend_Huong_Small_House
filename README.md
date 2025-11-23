@@ -109,6 +109,5 @@ Every module uses dedicated service classes to keep controllers thin and maintai
 - SMTP service sends HTML confirmation emails for every order.
 - Cloudinary integration is configured automatically when `CLOUDINARY_URL` is available.
 - Product images (`POST/PUT /products`) and profile avatar upload (`PUT /profile`) accept `multipart/form-data` and are pushed to Cloudinary. Provide `CLOUDINARY_FOLDER` to group uploads (defaults to `small-house`).
-- Auto-refresh access token: send `x-refresh-token: <refreshToken>` header alongside an expired access token; middleware will issue a new access token in response header `x-access-token`.
-- If access token is missing or expired but `x-refresh-token` is present and valid, protected endpoints will refresh and respond with `x-access-token` while processing the request.
+- Auto-refresh access token: refresh token được lưu trong httpOnly cookie `refreshToken` (set khi login/register/refresh). Nếu access token hết hạn hoặc thiếu nhưng cookie còn hợp lệ, server sẽ cấp `x-access-token` mới trong header và xử lý request. Có thể gửi `x-refresh-token` header thay cho cookie nếu cần.
 - Use the `health` endpoint (`GET /health`) for uptime checks.

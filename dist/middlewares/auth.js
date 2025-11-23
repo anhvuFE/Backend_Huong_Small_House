@@ -21,7 +21,9 @@ const authenticate = (req, res, next) => {
     const header = req.headers.authorization;
     const token = header?.startsWith('Bearer ') ? header.split(' ')[1] : undefined;
     const refreshHeader = req.headers['x-refresh-token'];
-    const refreshToken = typeof refreshHeader === 'string' ? refreshHeader : undefined;
+    const refreshToken = typeof refreshHeader === 'string'
+        ? refreshHeader
+        : req.cookies?.refreshToken;
     if (!token) {
         if (!refreshToken) {
             throw new appError_1.default('Unauthorized', 401);
