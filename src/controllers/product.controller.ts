@@ -82,3 +82,17 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
   const category = await productService.createCategory(req.body);
   res.status(201).json({ success: true, data: category });
 };
+
+export const getCategory = async (req: Request, res: Response): Promise<void> => {
+  const category = await productService.getCategory(Number(req.params.categoryId));
+  if (!category) {
+    res.status(404).json({ success: false, message: 'Category not found' });
+    return;
+  }
+  res.json({ success: true, data: category });
+};
+
+export const updateCategory = async (req: Request, res: Response): Promise<void> => {
+  const category = await productService.updateCategory(Number(req.params.categoryId), req.body);
+  res.json({ success: true, data: category });
+};

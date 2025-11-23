@@ -83,7 +83,7 @@ Seeded accounts:
 |-------------|-----------------------------------------------------------------------------|
 | Auth        | `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/forgot-password`, `POST /auth/reset-password`, `PUT /auth/change-password` |
 | Products    | `GET /products`, `GET /products/{id}`, `POST /products`, `PUT /products/{id}`, `DELETE /products/{id}` |
-| Categories  | `GET /products/categories/all`, `POST /products/categories`                 |
+| Categories  | `GET /products/categories/all`, `GET /products/categories/{id}`, `POST /products/categories`, `PUT /products/categories/{id}`                 |
 | Orders      | `POST /orders`, `GET /orders/me`, `GET /orders/{id}`, `GET /orders` (admin), `PATCH /orders/{id}/status` |
 | Payments    | `POST /orders/:orderId/payment/sepay`, `POST /orders/payment/sepay/callback`|
 | Promotions  | `GET /promotions`, `POST /promotions`, `GET /promotions/:code`              |

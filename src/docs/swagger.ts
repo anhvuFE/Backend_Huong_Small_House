@@ -756,6 +756,33 @@ const swaggerDefinition = {
         }
       }
     },
+    '/products/categories/{categoryId}': {
+      get: {
+        tags: ['Products'],
+        summary: 'Chi tiết danh mục',
+        parameters: [{ name: 'categoryId', in: 'path', required: true, schema: { type: 'integer' } }],
+        responses: {
+          200: successResponse('Thông tin danh mục', { $ref: '#/components/schemas/Category' }),
+          404: errorResponse('Không tìm thấy danh mục')
+        }
+      },
+      put: {
+        tags: ['Products'],
+        summary: 'Cập nhật danh mục (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'categoryId', in: 'path', required: true, schema: { type: 'integer' } }],
+        requestBody: {
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/CategoryRequest' } }
+          }
+        },
+        responses: {
+          200: successResponse('Cập nhật danh mục thành công', { $ref: '#/components/schemas/Category' }),
+          404: errorResponse('Không tìm thấy danh mục'),
+          409: errorResponse('Slug đã tồn tại')
+        }
+      }
+    },
     '/blogs': {
       get: {
         tags: ['Blogs'],
