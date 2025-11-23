@@ -9,7 +9,8 @@ import {
   listCategories,
   listProducts,
   updateProduct,
-  updateCategory
+  updateCategory,
+  deleteCategory
 } from '../controllers/product.controller';
 import { uploadMultipleImages } from '../middlewares/upload';
 
@@ -20,6 +21,7 @@ router.get('/categories/all', listCategories);
 router.post('/categories', authenticate, authorize('admin'), createCategory);
 router.get('/categories/:categoryId', getCategory);
 router.put('/categories/:categoryId', authenticate, authorize('admin'), updateCategory);
+router.delete('/categories/:categoryId', authenticate, authorize('admin'), deleteCategory);
 router.post('/', authenticate, authorize('admin'), uploadMultipleImages('images', 6), createProduct);
 router.get('/:productId', getProduct);
 router.put(

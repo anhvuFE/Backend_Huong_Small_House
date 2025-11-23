@@ -69,6 +69,14 @@ class ProductService {
     }
     return category;
   }
+
+  async deleteCategory(categoryId: number): Promise<void> {
+    const category = await Category.findOneAndDelete({ categoryId }).exec();
+    if (!category) {
+      throw new AppError('Category not found', 404);
+    }
+    await Product.deleteMany({ categoryId }).exec();
+  }
 }
 
 export default new ProductService();

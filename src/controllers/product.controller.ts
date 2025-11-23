@@ -96,3 +96,8 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
   const category = await productService.updateCategory(Number(req.params.categoryId), req.body);
   res.json({ success: true, data: category });
 };
+
+export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
+  await productService.deleteCategory(Number(req.params.categoryId));
+  res.status(204).send();
+};

@@ -63,6 +63,13 @@ class ProductService {
         }
         return category;
     }
+    async deleteCategory(categoryId) {
+        const category = await Category_1.default.findOneAndDelete({ categoryId }).exec();
+        if (!category) {
+            throw new appError_1.default('Category not found', 404);
+        }
+        await Product_1.default.deleteMany({ categoryId }).exec();
+    }
 }
 exports.default = new ProductService();
 //# sourceMappingURL=product.service.js.map

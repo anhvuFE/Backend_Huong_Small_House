@@ -775,6 +775,16 @@ const swaggerDefinition = {
                     404: errorResponse('Không tìm thấy danh mục'),
                     409: errorResponse('Slug đã tồn tại')
                 }
+            },
+            delete: {
+                tags: ['Products'],
+                summary: 'Xóa danh mục (admin) và sản phẩm thuộc danh mục',
+                security: [{ bearerAuth: [] }],
+                parameters: [{ name: 'categoryId', in: 'path', required: true, schema: { type: 'integer' } }],
+                responses: {
+                    204: noContentResponse('Đã xóa danh mục và sản phẩm liên quan'),
+                    404: errorResponse('Không tìm thấy danh mục')
+                }
             }
         },
         '/blogs': {
