@@ -29,7 +29,10 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
   const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.split(' ')[1] : undefined;
   const refreshHeader = req.headers['x-refresh-token'];
-  const refreshToken = typeof refreshHeader === 'string' ? refreshHeader : undefined;
+  const refreshToken =
+    typeof refreshHeader === 'string'
+      ? refreshHeader
+      : (req as Request & { cookies?: Record<string, string> }).cookies?.refreshToken;
 
   if (!token) {
     if (!refreshToken) {

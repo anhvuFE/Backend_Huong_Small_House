@@ -7,6 +7,7 @@ require("express-async-errors");
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const database_1 = require("./config/database");
@@ -19,10 +20,12 @@ const app = (0, express_1.default)();
 const corsOptions = {
     origin: env_1.default.nodeEnv === 'production' ? ['https://smallhouse.vn'] : true,
     allowedHeaders: ['Content-Type', 'Authorization', 'x-refresh-token'],
-    exposedHeaders: ['x-access-token']
+    exposedHeaders: ['x-access-token'],
+    credentials: true
 };
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)(corsOptions));
+app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 const limiter = (0, express_rate_limit_1.default)({
