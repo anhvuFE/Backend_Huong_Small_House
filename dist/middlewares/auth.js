@@ -20,8 +20,21 @@ const refreshAccessToken = (refreshToken) => {
 const authenticate = (req, res, next) => {
     const header = req.headers.authorization;
     const token = header?.startsWith('Bearer ') ? header.split(' ')[1] : undefined;
+    const refreshHeader = req.headers['x-refresh-token'];
+    const refreshToken = typeof refreshHeader === 'string' ? refreshHeader : undefined;
     if (!token) {
-        throw new appError_1.default('Unauthorized', 401);
+        if (!refreshToken) {
+            throw new appError_1.default('Unauthorized', 401);
+        }
+        const refreshed = refreshAccessToken(refreshToken);
+        if (!refreshed) {
+            throw new appError_1.default('Invalid token', 401);
+        }
+        req.user = { id: refreshed.id, role: refreshed.role };
+        req.newAccessToken = refreshed.accessToken;
+        res.setHeader('x-access-token', refreshed.accessToken);
+        next();
+        return;
     }
     try {
         const payload = jsonwebtoken_1.default.verify(token, env_1.default.jwt.secret);
@@ -29,8 +42,6 @@ const authenticate = (req, res, next) => {
         next();
     }
     catch (error) {
-        const refreshHeader = req.headers['x-refresh-token'];
-        const refreshToken = typeof refreshHeader === 'string' ? refreshHeader : undefined;
         if (error instanceof jsonwebtoken_1.default.TokenExpiredError && refreshToken) {
             const refreshed = refreshAccessToken(refreshToken);
             if (refreshed) {
