@@ -8,6 +8,8 @@ declare class ProductService {
     deleteProduct(productId: number): Promise<void>;
     listCategories(): Promise<ICategory[]>;
     createCategory(payload: Partial<ICategory>): Promise<ICategory>;
+    getCategory(categoryId: number): Promise<ICategory | null>;
+    updateCategory(categoryId: number, payload: Partial<ICategory>): Promise<ICategory>;
 }
 declare const _default: ProductService;
 export default _default;

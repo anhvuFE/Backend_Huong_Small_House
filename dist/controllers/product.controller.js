@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCategory = exports.listCategories = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getProduct = exports.listProducts = void 0;
+exports.updateCategory = exports.getCategory = exports.createCategory = exports.listCategories = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getProduct = exports.listProducts = void 0;
 const product_service_1 = __importDefault(require("../services/product.service"));
 const cloudinaryUpload_1 = require("../utils/cloudinaryUpload");
 const parseImagesField = (value) => {
@@ -82,4 +82,18 @@ const createCategory = async (req, res) => {
     res.status(201).json({ success: true, data: category });
 };
 exports.createCategory = createCategory;
+const getCategory = async (req, res) => {
+    const category = await product_service_1.default.getCategory(Number(req.params.categoryId));
+    if (!category) {
+        res.status(404).json({ success: false, message: 'Category not found' });
+        return;
+    }
+    res.json({ success: true, data: category });
+};
+exports.getCategory = getCategory;
+const updateCategory = async (req, res) => {
+    const category = await product_service_1.default.updateCategory(Number(req.params.categoryId), req.body);
+    res.json({ success: true, data: category });
+};
+exports.updateCategory = updateCategory;
 //# sourceMappingURL=product.controller.js.map

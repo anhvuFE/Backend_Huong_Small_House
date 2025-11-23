@@ -6,4 +6,6 @@ export declare const updateProduct: (req: Request, res: Response) => Promise<voi
 export declare const deleteProduct: (req: Request, res: Response) => Promise<void>;
 export declare const listCategories: (_req: Request, res: Response) => Promise<void>;
 export declare const createCategory: (req: Request, res: Response) => Promise<void>;
+export declare const getCategory: (req: Request, res: Response) => Promise<void>;
+export declare const updateCategory: (req: Request, res: Response) => Promise<void>;
 //# sourceMappingURL=product.controller.d.ts.map

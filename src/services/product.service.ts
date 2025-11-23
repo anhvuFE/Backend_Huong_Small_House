@@ -45,6 +45,30 @@ class ProductService {
     const category = await Category.create({ ...payload, slug });
     return category;
   }
+
+  async getCategory(categoryId: number): Promise<ICategory | null> {
+    return Category.findOne({ categoryId }).exec();
+  }
+
+  async updateCategory(categoryId: number, payload: Partial<ICategory>): Promise<ICategory> {
+    const updatePayload = { ...payload };
+    if (payload.name && !payload.slug) {
+      updatePayload.slug = slugify(payload.name);
+    }
+
+    if (updatePayload.slug) {
+      const exists = await Category.findOne({ slug: updatePayload.slug, categoryId: { $ne: categoryId } });
+      if (exists) {
+        throw new AppError('Category already exists', 409);
+      }
+    }
+
+    const category = await Category.findOneAndUpdate({ categoryId }, updatePayload, { new: true }).exec();
+    if (!category) {
+      throw new AppError('Category not found', 404);
+    }
+    return category;
+  }
 }
 
 export default new ProductService();
