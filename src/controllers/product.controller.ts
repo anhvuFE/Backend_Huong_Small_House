@@ -3,6 +3,19 @@ import productService from '../services/product.service';
 import { uploadImagesBuffer } from '../utils/cloudinaryUpload';
 import { IProductImage } from '../models/Product';
 
+const parseNumericParam = (
+  value: string | undefined,
+  res: Response,
+  fieldName: string
+): number | null => {
+  const parsed = Number(value);
+  if (!value || Number.isNaN(parsed)) {
+    res.status(400).json({ success: false, message: `Invalid ${fieldName}` });
+    return null;
+  }
+  return parsed;
+};
+
 const parseImagesField = (value: unknown): IProductImage[] => {
   if (!value) return [];
   if (Array.isArray(value)) return value as IProductImage[];
@@ -23,8 +36,10 @@ export const listProducts = async (_req: Request, res: Response): Promise<void> 
 };
 
 export const getProduct = async (req: Request, res: Response): Promise<void> => {
-  const { productId } = req.params as { productId: string };
-  const product = await productService.getProduct(Number(productId));
+  const productId = parseNumericParam(req.params.productId, res, 'productId');
+  if (productId === null) return;
+
+  const product = await productService.getProduct(productId);
   if (!product) {
     res.status(404).json({ success: false, message: 'Product not found' });
     return;
@@ -62,14 +77,18 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       ? { ...req.body, images }
       : { ...req.body };
 
-  const product = await productService.updateProduct(Number(req.params.productId), {
-    ...payload
-  });
+  const productId = parseNumericParam(req.params.productId, res, 'productId');
+  if (productId === null) return;
+
+  const product = await productService.updateProduct(productId, { ...payload });
   res.json({ success: true, data: product });
 };
 
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
-  await productService.deleteProduct(Number(req.params.productId));
+  const productId = parseNumericParam(req.params.productId, res, 'productId');
+  if (productId === null) return;
+
+  await productService.deleteProduct(productId);
   res.status(204).send();
 };
 
@@ -84,7 +103,10 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 };
 
 export const getCategory = async (req: Request, res: Response): Promise<void> => {
-  const category = await productService.getCategory(Number(req.params.categoryId));
+  const categoryId = parseNumericParam(req.params.categoryId, res, 'categoryId');
+  if (categoryId === null) return;
+
+  const category = await productService.getCategory(categoryId);
   if (!category) {
     res.status(404).json({ success: false, message: 'Category not found' });
     return;
@@ -93,11 +115,17 @@ export const getCategory = async (req: Request, res: Response): Promise<void> =>
 };
 
 export const updateCategory = async (req: Request, res: Response): Promise<void> => {
-  const category = await productService.updateCategory(Number(req.params.categoryId), req.body);
+  const categoryId = parseNumericParam(req.params.categoryId, res, 'categoryId');
+  if (categoryId === null) return;
+
+  const category = await productService.updateCategory(categoryId, req.body);
   res.json({ success: true, data: category });
 };
 
 export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
-  await productService.deleteCategory(Number(req.params.categoryId));
+  const categoryId = parseNumericParam(req.params.categoryId, res, 'categoryId');
+  if (categoryId === null) return;
+
+  await productService.deleteCategory(categoryId);
   res.status(204).send();
 };
