@@ -55,16 +55,31 @@ class OrderService {
       if (!promo) {
         throw new AppError('Mã khuyến mãi không hợp lệ', 400);
       }
-      if (promo.validUntil < new Date()) {
+      const now = new Date();
+      if (promo.status && promo.status !== 'active') {
+        throw new AppError('Mã khuyến mãi đang tạm dừng', 400);
+      }
+      if (promo.validFrom && promo.validFrom > now) {
+        throw new AppError('Mã khuyến mãi chưa bắt đầu', 400);
+      }
+      if (promo.validUntil < now) {
         throw new AppError('Mã khuyến mãi đã hết hạn', 400);
       }
       if (promo.usageLimit && promo.usedCount >= promo.usageLimit) {
         throw new AppError('Mã khuyến mãi đã được sử dụng tối đa', 400);
       }
-      total = promo.type === 'percent' ? total - (total * promo.value) / 100 : total - promo.value;
-      if (total < 0) {
-        total = 0;
+      if (promo.minOrderValue && total < promo.minOrderValue) {
+        throw new AppError(`Đơn tối thiểu ${promo.minOrderValue}đ để dùng mã`, 400);
       }
+
+      const discount =
+        promo.type === 'percent' ? (total * promo.value) / 100 : promo.value;
+      const cappedDiscount =
+        promo.maxDiscount && promo.maxDiscount > 0 && discount > promo.maxDiscount
+          ? promo.maxDiscount
+          : discount;
+
+      total = Math.max(0, total - cappedDiscount);
       promo.usedCount += 1;
       await promo.save();
     }

@@ -264,23 +264,34 @@ const swaggerDefinition = {
       Promotion: {
         type: 'object',
         properties: {
+          name: { type: 'string' },
           code: { type: 'string' },
           type: { type: 'string', enum: ['percent', 'fixed'] },
           value: { type: 'number' },
+          validFrom: { type: 'string', format: 'date-time' },
           validUntil: { type: 'string', format: 'date-time' },
           usageLimit: { type: 'number' },
-          usedCount: { type: 'number' }
+          usedCount: { type: 'number' },
+          status: { type: 'string', enum: ['active', 'inactive'] },
+          minOrderValue: { type: 'number', description: 'Đơn tối thiểu để áp dụng' },
+          maxDiscount: { type: 'number', description: 'Giảm tối đa (0 = không giới hạn)' },
+          description: { type: 'string' }
         }
       },
       PromotionRequest: {
         type: 'object',
         required: ['code', 'type', 'value', 'validUntil'],
         properties: {
+          name: { type: 'string' },
           code: { type: 'string' },
           type: { type: 'string', enum: ['percent', 'fixed'] },
           value: { type: 'number' },
+          validFrom: { type: 'string', format: 'date-time' },
           validUntil: { type: 'string', format: 'date-time' },
-          usageLimit: { type: 'number' }
+          usageLimit: { type: 'number' },
+          minOrderValue: { type: 'number' },
+          maxDiscount: { type: 'number' },
+          description: { type: 'string' }
         }
       },
       Review: {
@@ -1031,6 +1042,68 @@ const swaggerDefinition = {
         parameters: [{ name: 'code', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
           200: successResponse('Thông tin mã khuyến mãi', { $ref: '#/components/schemas/Promotion' }),
+          404: errorResponse('Không tìm thấy mã khuyến mãi')
+        }
+      }
+    },
+    '/promotions/id/{id}': {
+      get: {
+        tags: ['Promotions'],
+        summary: 'Xem mã khuyến mãi theo id (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          200: successResponse('Thông tin mã khuyến mãi', { $ref: '#/components/schemas/Promotion' }),
+          404: errorResponse('Không tìm thấy mã khuyến mãi')
+        }
+      },
+      patch: {
+        tags: ['Promotions'],
+        summary: 'Chỉnh sửa mã khuyến mãi (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/PromotionRequest' } }
+          }
+        },
+        responses: {
+          200: successResponse('Cập nhật mã khuyến mãi', { $ref: '#/components/schemas/Promotion' }),
+          404: errorResponse('Không tìm thấy mã khuyến mãi')
+        }
+      },
+      delete: {
+        tags: ['Promotions'],
+        summary: 'Xóa mã khuyến mãi (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          204: noContentResponse('Đã xóa'),
+          404: errorResponse('Không tìm thấy mã khuyến mãi')
+        }
+      }
+    },
+    '/promotions/{id}/status': {
+      patch: {
+        tags: ['Promotions'],
+        summary: 'Cập nhật trạng thái mã khuyến mãi (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['status'],
+                properties: { status: { type: 'string', enum: ['active', 'inactive'] } }
+              }
+            }
+          }
+        },
+        responses: {
+          200: successResponse('Cập nhật trạng thái thành công', { $ref: '#/components/schemas/Promotion' }),
           404: errorResponse('Không tìm thấy mã khuyến mãi')
         }
       }
