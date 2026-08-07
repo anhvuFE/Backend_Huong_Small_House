@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
 import productRoutes from './product.routes';
+import categoryRoutes from './category.routes';
 import orderRoutes from './order.routes';
 import promotionRoutes from './promotion.routes';
 import reviewRoutes from './review.routes';
@@ -15,6 +16,7 @@ const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/products', productRoutes);
+router.use('/categories', categoryRoutes);
 router.use('/orders', orderRoutes);
 router.use('/promotions', promotionRoutes);
 router.use('/reviews', reviewRoutes);
