@@ -9,6 +9,7 @@ import { connectDatabase } from './config/database';
 import env from './config/env';
 import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
+import { notFound } from './middlewares/notFound';
 import logger from './utils/logger';
 import swaggerSpec from './docs/swagger';
 
@@ -44,6 +45,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/api', routes);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
+app.use(notFound);
 app.use(errorHandler);
 
 const start = async (): Promise<void> => {
