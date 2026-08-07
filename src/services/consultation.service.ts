@@ -35,7 +35,9 @@ class ConsultationService {
   }
 
   async getById(id: string): Promise<IConsultation | null> {
-    return Consultation.findById(id).populate('user', 'name email').exec();
+    // Không populate 'user' ở đây: controller so khớp quyền sở hữu bằng
+    // consultation.user.toString() === req.user.id — populate sẽ làm hỏng so sánh.
+    return Consultation.findById(id).exec();
   }
 
   private async addMessage(
