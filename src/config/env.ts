@@ -2,14 +2,31 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const isProduction = (process.env.NODE_ENV || 'development') === 'production';
+
+/**
+ * Biến môi trường quan trọng: BẮT BUỘC ở production (thiếu -> throw ngay khi
+ * khởi động, tránh chạy bằng secret mặc định dễ đoán). Ở dev dùng fallback.
+ */
+function requiredSecret(key: string, devFallback: string): string {
+  const value = process.env[key];
+  if (value && value.trim().length > 0) return value;
+  if (isProduction) {
+    throw new Error(
+      `[env] Missing required environment variable "${key}". Refusing to start in production with an insecure default.`
+    );
+  }
+  return devFallback;
+}
+
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT) || 4000,
-  mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/small-house',
+  mongoUri: requiredSecret('MONGO_URI', 'mongodb://127.0.0.1:27017/small-house'),
   jwt: {
-    secret: process.env.JWT_SECRET || 'supersecretkey',
+    secret: requiredSecret('JWT_SECRET', 'dev-only-insecure-jwt-secret'),
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'refreshsecret',
+    refreshSecret: requiredSecret('JWT_REFRESH_SECRET', 'dev-only-insecure-refresh-secret'),
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
   },
   smtp: {
@@ -32,7 +49,7 @@ const env = {
   },
   admin: {
     email: process.env.ADMIN_EMAIL || 'admin@smallhouse.vn',
-    password: process.env.ADMIN_PASSWORD || '123456'
+    password: requiredSecret('ADMIN_PASSWORD', '123456')
   }
 };
 
