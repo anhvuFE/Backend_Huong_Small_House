@@ -6,6 +6,7 @@ import Guest from '../models/Guest';
 import AppError from '../utils/appError';
 import MailService from './mail.service';
 import paymentService from './payment.service';
+import logger from '../utils/logger';
 
 export interface CreateOrderPayload {
   userId?: string;
@@ -112,7 +113,12 @@ class OrderService {
       })
     );
 
-    await MailService.sendOrderConfirmation(order);
+    // Email xác nhận là best-effort: lỗi gửi mail KHÔNG được làm hỏng đơn.
+    try {
+      await MailService.sendOrderConfirmation(order);
+    } catch (err) {
+      logger.error('Order confirmation email failed (order still created): %s', (err as Error).message);
+    }
 
     const response: { order: IOrder; checkoutUrl?: string } = { order };
     if (order.paymentMethod === 'Sepay') {
