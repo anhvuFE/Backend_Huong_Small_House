@@ -4,6 +4,7 @@ import orderService, { CreateOrderPayload } from '../services/order.service';
 import paymentService from '../services/payment.service';
 import { AuthRequest } from '../middlewares/auth';
 import AppError from '../utils/appError';
+import { emitToAdmin } from '../socket';
 
 export const createOrder = async (req: AuthRequest, res: Response): Promise<void> => {
   const payload: CreateOrderPayload = {
@@ -16,6 +17,13 @@ export const createOrder = async (req: AuthRequest, res: Response): Promise<void
     promotionCode: req.body.promotionCode
   };
   const result = await orderService.createOrder(payload);
+
+  emitToAdmin('order:new', {
+    orderId: result.order.orderId,
+    total: result.order.total,
+    paymentMethod: result.order.paymentMethod,
+    createdAt: new Date()
+  });
 
   res.status(201).json({ success: true, data: result });
 };
