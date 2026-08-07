@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import productService from '../services/product.service';
+import productService, { ListProductsQuery } from '../services/product.service';
 import { uploadImagesBuffer } from '../utils/cloudinaryUpload';
 import { IProductImage } from '../models/Product';
 
@@ -30,9 +30,36 @@ const parseImagesField = (value: unknown): IProductImage[] => {
   return [];
 };
 
-export const listProducts = async (_req: Request, res: Response): Promise<void> => {
-  const products = await productService.listProducts();
-  res.json({ success: true, data: products });
+const toNumber = (value: unknown): number | undefined => {
+  if (value === undefined) return undefined;
+  const n = Number(value);
+  return Number.isNaN(n) ? undefined : n;
+};
+
+export const listProducts = async (req: Request, res: Response): Promise<void> => {
+  const { category, search, brand, minPrice, maxPrice, sort, page, limit } = req.query;
+
+  const result = await productService.listProducts({
+    category: toNumber(category),
+    search: typeof search === 'string' ? search : undefined,
+    brand: typeof brand === 'string' ? brand : undefined,
+    minPrice: toNumber(minPrice),
+    maxPrice: toNumber(maxPrice),
+    sort: typeof sort === 'string' ? (sort as ListProductsQuery['sort']) : undefined,
+    page: toNumber(page),
+    limit: toNumber(limit)
+  });
+
+  const body: Record<string, unknown> = { success: true, data: result.items };
+  if (result.paginated) {
+    body.meta = {
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      pages: Math.ceil(result.total / result.limit)
+    };
+  }
+  res.json(body);
 };
 
 export const getProduct = async (req: Request, res: Response): Promise<void> => {
