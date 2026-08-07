@@ -2,6 +2,7 @@ import { Response } from 'express';
 import feedbackService from '../services/feedback.service';
 import { AuthRequest } from '../middlewares/auth';
 import AppError from '../utils/appError';
+import { emitToAdmin } from '../socket';
 
 export const createFeedback = async (req: AuthRequest, res: Response): Promise<void> => {
   const payload = {
@@ -16,6 +17,12 @@ export const createFeedback = async (req: AuthRequest, res: Response): Promise<v
     throw new AppError('Thiếu thông tin liên hệ hoặc nội dung', 400);
   }
   const feedback = await feedbackService.create(payload);
+  emitToAdmin('feedback:new', {
+    id: feedback.id,
+    name: feedback.name,
+    email: feedback.email,
+    createdAt: new Date()
+  });
   res.status(201).json({ success: true, data: feedback });
 };
 

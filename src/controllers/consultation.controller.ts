@@ -2,6 +2,9 @@ import { Response } from 'express';
 import consultationService from '../services/consultation.service';
 import { AuthRequest } from '../middlewares/auth';
 import AppError from '../utils/appError';
+import { emitToAdmin, emitToConsultation } from '../socket';
+
+const lastMessage = (c: { messages: unknown[] }) => c.messages[c.messages.length - 1];
 
 export const createConsultation = async (req: AuthRequest, res: Response): Promise<void> => {
   const payload = {
@@ -15,6 +18,12 @@ export const createConsultation = async (req: AuthRequest, res: Response): Promi
     throw new AppError('Thiếu thông tin tư vấn', 400);
   }
   const consultation = await consultationService.create(payload);
+  emitToAdmin('consultation:new', {
+    id: consultation.id,
+    name: consultation.name,
+    topic: consultation.topic,
+    createdAt: new Date()
+  });
   res.status(201).json({ success: true, data: consultation });
 };
 
@@ -50,12 +59,15 @@ export const userSendMessage = async (req: AuthRequest, res: Response): Promise<
     throw new AppError('Forbidden', 403);
   }
   const updated = await consultationService.userMessage(consultationId, req.body.message);
+  emitToConsultation(consultationId, 'consultation:message', lastMessage(updated));
+  emitToAdmin('consultation:message', { consultationId, message: lastMessage(updated) });
   res.json({ success: true, data: updated });
 };
 
 export const adminSendMessage = async (req: AuthRequest, res: Response): Promise<void> => {
   const { consultationId } = req.params as { consultationId: string };
   const updated = await consultationService.adminMessage(consultationId, req.body.message);
+  emitToConsultation(consultationId, 'consultation:message', lastMessage(updated));
   res.json({ success: true, data: updated });
 };
 

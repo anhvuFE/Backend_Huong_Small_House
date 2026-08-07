@@ -1,4 +1,5 @@
 import 'express-async-errors';
+import { createServer } from 'http';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -12,6 +13,7 @@ import { errorHandler } from './middlewares/errorHandler';
 import { notFound } from './middlewares/notFound';
 import logger from './utils/logger';
 import swaggerSpec from './docs/swagger';
+import { initSocket } from './socket';
 
 const app = express();
 
@@ -50,7 +52,9 @@ app.use(errorHandler);
 
 const start = async (): Promise<void> => {
   await connectDatabase();
-  app.listen(env.port, () => logger.info(`Server listening on port ${env.port}`));
+  const server = createServer(app);
+  initSocket(server);
+  server.listen(env.port, () => logger.info(`Server listening on port ${env.port}`));
 };
 
 void start();
