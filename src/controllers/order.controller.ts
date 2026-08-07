@@ -4,7 +4,7 @@ import orderService, { CreateOrderPayload } from '../services/order.service';
 import paymentService from '../services/payment.service';
 import { AuthRequest } from '../middlewares/auth';
 import AppError from '../utils/appError';
-import { emitToAdmin } from '../socket';
+import { emitToAdmin, emitToUser } from '../socket';
 
 export const createOrder = async (req: AuthRequest, res: Response): Promise<void> => {
   const payload: CreateOrderPayload = {
@@ -68,6 +68,16 @@ export const getOrderDetail = async (req: AuthRequest, res: Response): Promise<v
 export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
   const { orderId } = req.params as { orderId: string };
   const order = await orderService.updateStatus(Number(orderId), req.body.status);
+
+  // Báo cho khách (nếu là tài khoản đã đăng ký) khi đơn đổi trạng thái.
+  if (order?.user) {
+    emitToUser(String(order.user), 'order:status', {
+      orderId: order.orderId,
+      status: order.status,
+      updatedAt: new Date()
+    });
+  }
+
   res.json({ success: true, data: order });
 };
 
