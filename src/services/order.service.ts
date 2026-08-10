@@ -95,23 +95,43 @@ class OrderService {
       throw new AppError('Thiếu thông tin người mua', 400);
     }
 
-    const order = await Order.create({
-      ...session,
-      email: payload.email,
-      items: orderItems,
-      total,
-      paymentMethod: payload.paymentMethod,
-      note: payload.note
-    });
+    // Trừ kho ATOMIC: điều kiện `stock >= qty` nằm ngay trong lệnh update nên hai
+    // đơn đồng thời không thể cùng "mua" phần hàng cuối (chống bán vượt kho / race).
+    // Nếu bất kỳ mặt hàng nào không đủ, hoàn lại phần đã trừ trước đó rồi báo lỗi.
+    const reserved: Array<{ productId: number; quantity: number }> = [];
+    const rollbackStock = (): Promise<unknown> =>
+      Promise.all(
+        reserved.map((r) => Product.updateOne({ productId: r.productId }, { $inc: { stock: r.quantity } }))
+      );
 
-    await Promise.all(
-      products.map((product) => {
-        const ordered = payload.items.find((item) => item.productId === product.productId);
-        if (!ordered) return Promise.resolve();
-        product.stock -= ordered.quantity;
-        return product.save();
-      })
-    );
+    for (const item of payload.items) {
+      const updated = await Product.findOneAndUpdate(
+        { productId: item.productId, stock: { $gte: item.quantity } },
+        { $inc: { stock: -item.quantity } }
+      ).exec();
+      if (!updated) {
+        await rollbackStock();
+        const product = products.find((p) => p.productId === item.productId);
+        throw new AppError(`Sản phẩm ${product?.name ?? item.productId} không đủ hàng`, 400);
+      }
+      reserved.push({ productId: item.productId, quantity: item.quantity });
+    }
+
+    let order: IOrder;
+    try {
+      order = await Order.create({
+        ...session,
+        email: payload.email,
+        items: orderItems,
+        total,
+        paymentMethod: payload.paymentMethod,
+        note: payload.note
+      });
+    } catch (err) {
+      // Tạo đơn thất bại sau khi đã trừ kho -> hoàn kho để không thất thoát.
+      await rollbackStock();
+      throw err;
+    }
 
     // Email xác nhận là best-effort: lỗi gửi mail KHÔNG được làm hỏng đơn.
     try {
