@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import blogService from '../services/blog.service';
 import { uploadImageBuffer } from '../utils/cloudinaryUpload';
+import { parseNumericId } from '../utils/numericId';
 
 export const listBlogs = async (_req: Request, res: Response): Promise<void> => {
   const blogs = await blogService.listBlogs();
@@ -13,7 +14,7 @@ export const listAllBlogs = async (_req: Request, res: Response): Promise<void> 
 };
 
 export const getBlog = async (req: Request, res: Response): Promise<void> => {
-  const blog = await blogService.getBlog(Number(req.params.blogId));
+  const blog = await blogService.getBlog(parseNumericId(req.params.blogId, 'blogId'));
   if (!blog) {
     res.status(404).json({ success: false, message: 'Blog not found' });
     return;
@@ -39,11 +40,11 @@ export const updateBlog = async (req: Request, res: Response): Promise<void> => 
     payload.thumbnail = uploaded.url;
   }
 
-  const blog = await blogService.updateBlog(Number(req.params.blogId), payload);
+  const blog = await blogService.updateBlog(parseNumericId(req.params.blogId, 'blogId'), payload);
   res.json({ success: true, data: blog });
 };
 
 export const deleteBlog = async (req: Request, res: Response): Promise<void> => {
-  await blogService.deleteBlog(Number(req.params.blogId));
+  await blogService.deleteBlog(parseNumericId(req.params.blogId, 'blogId'));
   res.status(204).send();
 };

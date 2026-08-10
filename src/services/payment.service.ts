@@ -43,11 +43,17 @@ class PaymentService {
     }
 
     const orderId = Number(data.order_id);
-    await Order.findOneAndUpdate(
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      throw new AppError('Invalid order_id in callback', 400);
+    }
+    const updated = await Order.findOneAndUpdate(
       { orderId },
       { paymentStatus: 'paid', status: 'confirmed' },
       { new: true }
     );
+    if (!updated) {
+      throw new AppError('Order not found for callback', 404);
+    }
   }
 }
 
