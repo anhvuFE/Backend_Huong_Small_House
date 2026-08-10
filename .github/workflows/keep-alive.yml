@@ -1,0 +1,42 @@
+name: keep-alive
+
+# Giữ dịch vụ Render (free tier) không "ngủ" bằng cách ping /health định kỳ.
+# Render free tự tắt sau ~15 phút không có request; ta ping mỗi 10 phút.
+#
+# CẦN LÀM 1 LẦN: thêm biến repo RENDER_HEALTH_URL tại
+#   Settings > Secrets and variables > Actions > Variables > New variable
+#   name  = RENDER_HEALTH_URL
+#   value = https://<ten-service>.onrender.com/health
+# Chưa set thì job sẽ bỏ qua (không báo lỗi). Set rồi thì job cũng đóng vai trò
+# cảnh báo: nếu backend chết thật (HTTP >= 400) job sẽ đỏ và GitHub gửi email.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # mỗi 10 phút (lịch của GitHub có thể trễ vài phút)
+  workflow_dispatch: {}       # cho phép chạy tay để test
+
+permissions: {}               # least-privilege: job chỉ curl, không cần quyền repo
+
+concurrency:
+  group: keep-alive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render /health
+        run: |
+          URL="${{ vars.RENDER_HEALTH_URL }}"
+          if [ -z "$URL" ]; then
+            echo "::notice::RENDER_HEALTH_URL chưa được set — bỏ qua ping. Thêm biến repo để kích hoạt."
+            exit 0
+          fi
+          echo "Pinging $URL"
+          code=$(curl -sS -m 60 --retry 3 --retry-delay 10 -o /dev/null -w '%{http_code}' "$URL")
+          echo "HTTP $code"
+          if [ "$code" -lt 200 ] || [ "$code" -ge 400 ]; then
+            echo "::error::Health check thất bại (HTTP $code)"
+            exit 1
+          fi
+          echo "OK — dịch vụ còn thức."
