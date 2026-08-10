@@ -23,6 +23,13 @@ export interface CreateOrderPayload {
   promotionCode?: string;
 }
 
+// Chữ ký bất biến của giỏ hàng (không phụ thuộc thứ tự) để so khớp đơn trùng.
+const itemsSignature = (items: Array<{ productId: number; quantity: number }>): string =>
+  items
+    .map((i) => `${i.productId}x${i.quantity}`)
+    .sort()
+    .join('|');
+
 class OrderService {
   async createOrder(payload: CreateOrderPayload): Promise<{ order: IOrder; checkoutUrl?: string }> {
     if (!payload.items.length) {
@@ -48,6 +55,29 @@ class OrderService {
         quantity: item.quantity
       };
     });
+
+    // Idempotency: chặn đơn TRÙNG do double-submit / retry mạng. Nếu cùng người
+    // mua đặt đúng các sản phẩm & phương thức thanh toán trong ~15s gần nhất thì
+    // trả lại đơn đã tạo thay vì tạo mới (đặt TRƯỚC promo & trừ kho để không
+    // double-count usedCount / stock).
+    const buyerFilter = payload.userId
+      ? { user: new Types.ObjectId(payload.userId) }
+      : { email: payload.email };
+    const recentOrder = await Order.findOne({
+      ...buyerFilter,
+      paymentMethod: payload.paymentMethod,
+      createdAt: { $gte: new Date(Date.now() - 15_000) }
+    })
+      .sort({ createdAt: -1 })
+      .exec();
+    if (recentOrder && itemsSignature(recentOrder.items) === itemsSignature(payload.items)) {
+      const duplicateResponse: { order: IOrder; checkoutUrl?: string } = { order: recentOrder };
+      if (recentOrder.paymentMethod === 'Sepay') {
+        const checkout = await paymentService.createSepayCheckout(recentOrder.orderId);
+        duplicateResponse.checkoutUrl = checkout.checkoutUrl;
+      }
+      return duplicateResponse;
+    }
 
     let total = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
