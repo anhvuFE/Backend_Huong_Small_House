@@ -1,0 +1,38 @@
+# Render Blueprint — tạo web service tự động từ file này.
+# Cách dùng: Render Dashboard > New > Blueprint > chọn repo này > Apply.
+# Render sẽ đọc cấu hình dưới đây và tạo service; bạn chỉ cần điền các biến
+# đánh dấu `sync: false` (MONGO_URI, ADMIN_PASSWORD, FRONTEND_URL).
+services:
+  - type: web
+    name: huong-small-house-api
+    runtime: node
+    plan: free
+    region: singapore            # gần VN nhất trong các region free
+    branch: dev                  # deploy từ nhánh dev (nhánh làm việc chính)
+    # Ép cài cả devDependencies (typescript) để `tsc` build được, kể cả khi
+    # NODE_ENV=production (npm sẽ bỏ devDeps nếu không có --include=dev).
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Bí mật JWT: để Render tự sinh giá trị an toàn, không cần tự nghĩ.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 1h
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: ADMIN_EMAIL
+        value: admin@gmail.com
+      # ↓ Bạn TỰ ĐIỀN khi Apply Blueprint (Render sẽ hỏi):
+      - key: MONGO_URI            # chuỗi kết nối MongoDB Atlas (mongodb+srv://...)
+        sync: false
+      - key: ADMIN_PASSWORD       # mật khẩu admin cho production
+        sync: false
+      - key: FRONTEND_URL         # URL frontend (cho CORS/redirect), vd https://...
+        sync: false
