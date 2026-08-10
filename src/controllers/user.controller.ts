@@ -5,7 +5,7 @@ import userService from '../services/user.service';
 
 const parseUserId = (raw: string): number => {
   const userId = Number(raw);
-  if (Number.isNaN(userId)) {
+  if (!Number.isInteger(userId) || userId <= 0) {
     throw new AppError('UserId không hợp lệ', 400);
   }
   return userId;
