@@ -30,6 +30,12 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Health check ĐẶT TRƯỚC rate limiter để monitor (UptimeRobot/cron-job.org)
+// ping giữ dịch vụ không "ngủ" mà không bao giờ bị 429. Không chạm DB -> luôn nhanh.
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime() });
+});
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
@@ -40,10 +46,6 @@ if (env.nodeEnv === 'production') {
 } else {
   logger.info('Rate limiting is disabled in non-production environments');
 }
-
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
-});
 
 app.use('/api', routes);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
