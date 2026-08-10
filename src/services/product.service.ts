@@ -3,6 +3,20 @@ import Product, { IProduct } from '../models/Product';
 import AppError from '../utils/appError';
 import slugify from '../utils/slugify';
 
+// Chỉ nhận các field hợp lệ từ client — chặn mass-assignment (vd productId,
+// rating) khiến hỏng bộ đếm auto-increment / trùng khóa / gian lận đánh giá.
+const pickProductFields = (payload: Partial<IProduct>): Partial<IProduct> => {
+  const clean: Partial<IProduct> = {};
+  if (payload.name !== undefined) clean.name = payload.name;
+  if (payload.brand !== undefined) clean.brand = payload.brand;
+  if (payload.categoryId !== undefined) clean.categoryId = payload.categoryId;
+  if (payload.description !== undefined) clean.description = payload.description;
+  if (payload.price !== undefined) clean.price = payload.price;
+  if (payload.stock !== undefined) clean.stock = payload.stock;
+  if (payload.images !== undefined) clean.images = payload.images;
+  return clean;
+};
+
 export interface ListProductsQuery {
   category?: number;
   search?: string;
@@ -40,7 +54,9 @@ class ProductService {
       filter.brand = query.brand;
     }
     if (query.search) {
-      const rx = new RegExp(query.search.trim(), 'i');
+      // Escape ký tự đặc biệt để tránh ReDoS / regex lỗi từ input người dùng.
+      const escaped = query.search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rx = new RegExp(escaped, 'i');
       filter.$or = [{ name: rx }, { brand: rx }, { description: rx }];
     }
     if (query.minPrice !== undefined || query.maxPrice !== undefined) {
@@ -74,12 +90,12 @@ class ProductService {
   }
 
   async createProduct(payload: Partial<IProduct>): Promise<IProduct> {
-    const product = await Product.create(payload);
+    const product = await Product.create(pickProductFields(payload));
     return product;
   }
 
   async updateProduct(productId: number, payload: Partial<IProduct>): Promise<IProduct | null> {
-    const product = await Product.findOneAndUpdate({ productId }, payload, { new: true });
+    const product = await Product.findOneAndUpdate({ productId }, pickProductFields(payload), { new: true });
     if (!product) {
       throw new AppError('Product not found', 404);
     }
