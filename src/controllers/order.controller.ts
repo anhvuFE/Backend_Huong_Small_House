@@ -38,6 +38,17 @@ export const listMyOrders = async (req: AuthRequest, res: Response): Promise<voi
   res.json({ success: true, data: orders });
 };
 
+// Ép orderId về số nguyên hợp lệ. Route "/:orderId" có thể nuốt cả những path
+// không phải số (vd GET /orders/admin) -> Number(...) ra NaN, khiến Mongoose cast
+// lỗi và trả 500. Chặn sớm ở đây và trả 400 rõ nghĩa.
+const parseOrderId = (raw: string): number => {
+  const orderId = Number(raw);
+  if (!Number.isInteger(orderId) || orderId <= 0) {
+    throw new AppError(`Invalid order id: "${raw}"`, 400);
+  }
+  return orderId;
+};
+
 const extractUserId = (order: { user?: Types.ObjectId | { _id?: Types.ObjectId } }): string | undefined => {
   const value = order.user as any;
   if (!value) return undefined;
@@ -52,7 +63,7 @@ const extractUserId = (order: { user?: Types.ObjectId | { _id?: Types.ObjectId }
 
 export const getOrderDetail = async (req: AuthRequest, res: Response): Promise<void> => {
   const { orderId } = req.params as { orderId: string };
-  const order = await orderService.getOrder(Number(orderId));
+  const order = await orderService.getOrder(parseOrderId(orderId));
   if (!order) {
     throw new AppError('Order not found', 404);
   }
@@ -67,7 +78,7 @@ export const getOrderDetail = async (req: AuthRequest, res: Response): Promise<v
 
 export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
   const { orderId } = req.params as { orderId: string };
-  const order = await orderService.updateStatus(Number(orderId), req.body.status);
+  const order = await orderService.updateStatus(parseOrderId(orderId), req.body.status);
 
   // Báo cho khách (nếu là tài khoản đã đăng ký) khi đơn đổi trạng thái.
   if (order?.user) {
@@ -83,7 +94,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
 
 export const createSepayCheckout = async (req: Request, res: Response): Promise<void> => {
   const { orderId } = req.params as { orderId: string };
-  const checkout = await paymentService.createSepayCheckout(Number(orderId));
+  const checkout = await paymentService.createSepayCheckout(parseOrderId(orderId));
   res.json({ success: true, data: checkout });
 };
 
