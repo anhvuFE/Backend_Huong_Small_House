@@ -80,6 +80,7 @@ class OrderService {
     }
 
     let total = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    let consumedPromoId: Types.ObjectId | null = null;
 
     if (payload.promotionCode) {
       const promo = await Promotion.findOne({ code: payload.promotionCode }).exec();
@@ -111,8 +112,21 @@ class OrderService {
           : discount;
 
       total = Math.max(0, total - cappedDiscount);
-      promo.usedCount += 1;
-      await promo.save();
+
+      // Tăng usedCount ATOMIC: điều kiện `usedCount < usageLimit` nằm ngay trong
+      // lệnh update nên hai đơn đồng thời không thể cùng vượt giới hạn lượt dùng.
+      if (promo.usageLimit && promo.usageLimit > 0) {
+        const claimed = await Promotion.findOneAndUpdate(
+          { _id: promo._id, $expr: { $lt: ['$usedCount', '$usageLimit'] } },
+          { $inc: { usedCount: 1 } }
+        ).exec();
+        if (!claimed) {
+          throw new AppError('Mã khuyến mãi đã được sử dụng tối đa', 400);
+        }
+      } else {
+        await Promotion.updateOne({ _id: promo._id }, { $inc: { usedCount: 1 } }).exec();
+      }
+      consumedPromoId = promo._id as Types.ObjectId;
     }
 
     const session: { user?: Types.ObjectId; guest?: Types.ObjectId } = {};
@@ -130,9 +144,13 @@ class OrderService {
     // Nếu bất kỳ mặt hàng nào không đủ, hoàn lại phần đã trừ trước đó rồi báo lỗi.
     const reserved: Array<{ productId: number; quantity: number }> = [];
     const rollbackStock = (): Promise<unknown> =>
-      Promise.all(
-        reserved.map((r) => Product.updateOne({ productId: r.productId }, { $inc: { stock: r.quantity } }))
-      );
+      Promise.all([
+        ...reserved.map((r) => Product.updateOne({ productId: r.productId }, { $inc: { stock: r.quantity } })),
+        // Hoàn lại lượt dùng mã KM nếu đã trừ nhưng đơn không tạo thành công.
+        consumedPromoId
+          ? Promotion.updateOne({ _id: consumedPromoId }, { $inc: { usedCount: -1 } })
+          : Promise.resolve()
+      ]);
 
     for (const item of payload.items) {
       const updated = await Product.findOneAndUpdate(
